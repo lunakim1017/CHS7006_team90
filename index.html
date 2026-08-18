@@ -2,6 +2,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
   /* ---------- tokens (from DESIGN_apple.md) ---------- */
@@ -642,6 +643,43 @@
     return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(item.name.ko + " 맛집");
   }
 
+  /* ---------- Supabase event logging ---------- */
+  var SUPABASE_URL = "YOUR_SUPABASE_URL";
+  var SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+
+  var sb = null;
+  if(window.supabase && SUPABASE_URL.indexOf("YOUR_") !== 0 && SUPABASE_ANON_KEY.indexOf("YOUR_") !== 0){
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+
+  function getSessionId(){
+    try{
+      var id = localStorage.getItem("kfood_session_id");
+      if(!id){
+        id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now() + "-" + Math.random().toString(16).slice(2));
+        localStorage.setItem("kfood_session_id", id);
+      }
+      return id;
+    }catch(e){ return "anon-" + Math.random().toString(16).slice(2); }
+  }
+  var sessionId = getSessionId();
+
+  function logEvent(eventType, item, extra){
+    if(!sb || !item) return;
+    extra = extra || {};
+    sb.from("food_events").insert({
+      session_id: sessionId,
+      food_id: item.id,
+      food_name_ko: item.name.ko,
+      event_type: eventType,
+      was_saved: typeof extra.wasSaved === "boolean" ? extra.wasSaved : null,
+      lang: state.lang,
+      query: extra.query || null
+    }).then(function(res){
+      if(res && res.error) console.warn("logEvent failed:", res.error.message);
+    });
+  }
+
   function matchesQuery(item){
     var q = state.query.trim().toLowerCase();
     if(!q) return true;
@@ -748,7 +786,7 @@
           '<div class="caption pairing-box">🥂 ' + escapeHtml(item.pairing[state.lang]) + '</div>' +
           '<div class="tip-box fine-print">💡 ' + t("tip") + ': ' + escapeHtml(item.tip[state.lang]) + '</div>' +
           '<button class="save-btn" data-action="toggle-save" data-id="' + item.id + '" aria-pressed="' + isSaved + '" style="position:static;align-self:flex-start;font-size:24px;" aria-label="' + (isSaved ? t("unsave") : t("save")) + '">' + (isSaved ? "♥" : "♡") + '</button>' +
-          '<a class="btn-find" href="' + escapeHtml(mapUrl(item)) + '" target="_blank" rel="noopener noreferrer">📍 ' + findLabel + '</a>' +
+          '<a class="btn-find" data-action="find-near-me" data-id="' + item.id + '" href="' + escapeHtml(mapUrl(item)) + '" target="_blank" rel="noopener noreferrer">📍 ' + findLabel + '</a>' +
         '</div>' +
       '</div>'
     );
@@ -869,8 +907,10 @@
       render();
     } else if(action === "toggle-save"){
       var id = btn.getAttribute("data-id");
-      if(state.saved.has(id)) state.saved.delete(id); else state.saved.add(id);
+      var nowSaved;
+      if(state.saved.has(id)){ state.saved.delete(id); nowSaved = false; } else { state.saved.add(id); nowSaved = true; }
       persist();
+      logEvent(nowSaved ? "save" : "unsave", findById(id), {wasSaved: nowSaved});
       render();
       e.stopPropagation();
     } else if(action === "open-detail"){
@@ -880,6 +920,9 @@
       if(btn.classList.contains("modal-backdrop") && e.target !== btn) return;
       state.detailId = null;
       render();
+    } else if(action === "find-near-me"){
+      var fid = btn.getAttribute("data-id");
+      logEvent("find_near_me", findById(fid), {wasSaved: state.saved.has(fid)});
     }
   });
 
@@ -896,6 +939,9 @@
     }
   });
 
+  var searchLogTimer = null;
+  var lastLoggedQuery = "";
+
   document.addEventListener("input", function(e){
     if(e.target && e.target.id === "search-input"){
       state.query = e.target.value;
@@ -910,6 +956,16 @@
         var html = '<div class="grid">' + list.map(cardHtml).join("") + '</div>';
         if(grid){ grid.outerHTML = html; } else if(emptyState){ emptyState.outerHTML = html; }
       }
+
+      clearTimeout(searchLogTimer);
+      searchLogTimer = setTimeout(function(){
+        var q = state.query.trim();
+        if(!q || q === lastLoggedQuery) return;
+        lastLoggedQuery = q;
+        list.forEach(function(item){
+          logEvent("search", item, {query: q});
+        });
+      }, 700);
     }
   });
 
