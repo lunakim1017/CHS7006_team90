@@ -644,13 +644,12 @@
   }
 
   /* ---------- Supabase event logging ---------- */
-  var SUPABASE_URL = "https://gwjpdpzxsnjdxdwqwumy.supabase.co";
-  var SUPABASE_ANON_KEY = "sb_publishable_6jNnL7VqPQHL-XFBKpFEBQ_EwrluXmR";
-
   var sb = null;
-  if(window.supabase && SUPABASE_URL.indexOf("YOUR_") !== 0 && SUPABASE_ANON_KEY.indexOf("YOUR_") !== 0){
-    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  }
+  fetch("/api/config").then(function(r){ return r.json(); }).then(function(cfg){
+    if(window.supabase && cfg.supabaseUrl && cfg.supabaseAnonKey){
+      sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    }
+  }).catch(function(e){ console.warn("Supabase config fetch failed:", e); });
 
   function getSessionId(){
     try{

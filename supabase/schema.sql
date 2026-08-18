@@ -20,14 +20,17 @@ create index if not exists food_events_created_at_idx on public.food_events (cre
 
 alter table public.food_events enable row level security;
 
--- The app writes with the public anon key, so it only needs INSERT.
--- Reads/analysis happen from the Supabase SQL editor (which runs as an
--- admin role and bypasses RLS), so no anon SELECT policy is added here.
+-- The app writes with the public (anon/publishable) key, so it only needs
+-- INSERT. Targeting "public" rather than "anon" avoids depending on which
+-- Postgres role a given key format happens to map to. Reads/analysis
+-- happen from the Supabase SQL editor (an admin role that bypasses RLS
+-- entirely), so no public SELECT policy is added here.
 drop policy if exists "anon can insert food_events" on public.food_events;
-create policy "anon can insert food_events"
+drop policy if exists "anyone can insert food_events" on public.food_events;
+create policy "anyone can insert food_events"
   on public.food_events
   for insert
-  to anon
+  to public
   with check (true);
 
 -- Per-food, per-event-type counts (covers "검색한 음식" / "저장한 음식" volumes).
