@@ -2,7 +2,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
   /* ---------- tokens (from DESIGN_apple.md) ---------- */
@@ -643,14 +642,7 @@
     return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(item.name.ko + " 맛집");
   }
 
-  /* ---------- Supabase event logging ---------- */
-  var sb = null;
-  fetch("/api/config").then(function(r){ return r.json(); }).then(function(cfg){
-    if(window.supabase && cfg.supabaseUrl && cfg.supabaseAnonKey){
-      sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
-    }
-  }).catch(function(e){ console.warn("Supabase config fetch failed:", e); });
-
+  /* ---------- event logging (goes through our own /api/log-event, never talks to Supabase directly) ---------- */
   function getSessionId(){
     try{
       var id = localStorage.getItem("kfood_session_id");
@@ -664,19 +656,19 @@
   var sessionId = getSessionId();
 
   function logEvent(eventType, item, extra){
-    if(!sb || !item) return;
+    if(!item) return;
     extra = extra || {};
-    sb.from("food_events").insert({
-      session_id: sessionId,
-      food_id: item.id,
-      food_name_ko: item.name.ko,
-      event_type: eventType,
-      was_saved: typeof extra.wasSaved === "boolean" ? extra.wasSaved : null,
-      lang: state.lang,
-      query: extra.query || null
-    }).then(function(res){
-      if(res && res.error) console.warn("logEvent failed:", res.error.message);
-    });
+    fetch("/api/log-event", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        session_id: sessionId,
+        food_id: item.id,
+        food_name_ko: item.name.ko,
+        event_type: eventType,
+        was_saved: typeof extra.wasSaved === "boolean" ? extra.wasSaved : null
+      })
+    }).catch(function(e){ console.warn("logEvent failed:", e); });
   }
 
   function matchesQuery(item){
@@ -938,9 +930,6 @@
     }
   });
 
-  var searchLogTimer = null;
-  var lastLoggedQuery = "";
-
   document.addEventListener("input", function(e){
     if(e.target && e.target.id === "search-input"){
       state.query = e.target.value;
@@ -955,16 +944,6 @@
         var html = '<div class="grid">' + list.map(cardHtml).join("") + '</div>';
         if(grid){ grid.outerHTML = html; } else if(emptyState){ emptyState.outerHTML = html; }
       }
-
-      clearTimeout(searchLogTimer);
-      searchLogTimer = setTimeout(function(){
-        var q = state.query.trim();
-        if(!q || q === lastLoggedQuery) return;
-        lastLoggedQuery = q;
-        list.forEach(function(item){
-          logEvent("search", item, {query: q});
-        });
-      }, 700);
     }
   });
 
