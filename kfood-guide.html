@@ -1,0 +1,918 @@
+<title>K-Food Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* ---------- tokens (from DESIGN_apple.md) ---------- */
+  :root{
+    --color-primary:#0066cc;
+    --color-primary-focus:#0071e3;
+    --color-primary-on-dark:#2997ff;
+    --color-ink:#1d1d1f;
+    --color-on-dark:#ffffff;
+    --color-body-muted:#cccccc;
+    --color-ink-muted-80:#333333;
+    --color-ink-muted-48:#7a7a7a;
+    --color-hairline:#e0e0e0;
+    --color-canvas:#ffffff;
+    --color-parchment:#f5f5f7;
+    --color-pearl:#fafafc;
+    --color-tile-1:#272729;
+    --color-tile-2:#2a2a2c;
+    --color-tile-3:#252527;
+    --color-black:#000000;
+    --color-chip-translucent:rgba(210,210,215,.64);
+    --color-on-primary:#ffffff;
+
+    --radius-none:0px; --radius-xs:5px; --radius-sm:8px; --radius-md:11px; --radius-lg:18px; --radius-pill:9999px;
+    --space-xxs:4px; --space-xs:8px; --space-sm:12px; --space-md:17px; --space-lg:24px; --space-xl:32px; --space-xxl:48px; --space-section:80px;
+    --shadow-product:3px 5px 30px rgba(0,0,0,.22);
+
+    --font-display:'SF Pro Display',-apple-system,BlinkMacSystemFont,'Inter','Noto Sans KR','Noto Sans SC',system-ui,sans-serif;
+    --font-text:'SF Pro Text',-apple-system,BlinkMacSystemFont,'Inter','Noto Sans KR','Noto Sans SC',system-ui,sans-serif;
+
+    /* semantic surface roles -> light values */
+    --bg-page:var(--color-parchment);
+    --bg-canvas:var(--color-canvas);
+    --bg-tile:var(--color-parchment);
+    --bg-chip:var(--color-canvas);
+    --bg-pearl:var(--color-pearl);
+    --text-primary:var(--color-ink);
+    --text-secondary:var(--color-ink-muted-80);
+    --text-tertiary:var(--color-ink-muted-48);
+    --border-hairline:var(--color-hairline);
+    --accent:var(--color-primary);
+    --accent-focus:var(--color-primary-focus);
+    --pip-filled:var(--color-ink);
+    --pip-empty:var(--color-hairline);
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg-page:var(--color-tile-3);
+      --bg-canvas:var(--color-tile-1);
+      --bg-tile:var(--color-tile-2);
+      --bg-chip:var(--color-tile-2);
+      --bg-pearl:var(--color-tile-2);
+      --text-primary:#ffffff;
+      --text-secondary:var(--color-body-muted);
+      --text-tertiary:rgba(255,255,255,.55);
+      --border-hairline:rgba(255,255,255,.14);
+      --accent:var(--color-primary-on-dark);
+      --accent-focus:var(--color-primary-on-dark);
+      --pip-filled:#ffffff;
+      --pip-empty:rgba(255,255,255,.25);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg-page:var(--color-tile-3);
+    --bg-canvas:var(--color-tile-1);
+    --bg-tile:var(--color-tile-2);
+    --bg-chip:var(--color-tile-2);
+    --bg-pearl:var(--color-tile-2);
+    --text-primary:#ffffff;
+    --text-secondary:var(--color-body-muted);
+    --text-tertiary:rgba(255,255,255,.55);
+    --border-hairline:rgba(255,255,255,.14);
+    --accent:var(--color-primary-on-dark);
+    --accent-focus:var(--color-primary-on-dark);
+    --pip-filled:#ffffff;
+    --pip-empty:rgba(255,255,255,.25);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg-page);
+    color:var(--text-primary);
+    font-family:var(--font-text);
+    font-size:17px;
+    line-height:1.47;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  img,svg{max-width:100%;display:block;}
+  button{font-family:inherit;cursor:pointer;}
+  input{font-family:inherit;}
+  a{color:var(--accent);}
+  :focus-visible{outline:2px solid var(--accent-focus);outline-offset:2px;}
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.001ms !important;transition-duration:.001ms !important;}
+  }
+
+  h1,h2,h3,p{margin:0;text-wrap:balance;}
+
+  /* Apple-tight negative tracking reserved for Latin (English) UI; CJK stays neutral to avoid glyph crowding */
+  body.lang-en .tracked-hero{letter-spacing:-.28px;}
+  body.lang-en .tracked-display{letter-spacing:0;}
+  body.lang-en .tracked-tagline{letter-spacing:.231px;}
+  body.lang-en .tracked-body{letter-spacing:-.374px;}
+  body:not(.lang-en) .tracked-hero,
+  body:not(.lang-en) .tracked-display,
+  body:not(.lang-en) .tracked-tagline,
+  body:not(.lang-en) .tracked-body{letter-spacing:0;}
+
+  /* ---------- typography scale ---------- */
+  .hero-display{font-family:var(--font-display);font-size:56px;font-weight:600;line-height:1.07;}
+  .display-lg{font-family:var(--font-display);font-size:40px;font-weight:600;line-height:1.1;}
+  .lead{font-family:var(--font-display);font-size:28px;font-weight:400;line-height:1.14;}
+  .tagline{font-family:var(--font-display);font-size:21px;font-weight:600;line-height:1.19;}
+  .body-strong{font-family:var(--font-text);font-size:17px;font-weight:600;line-height:1.24;}
+  .body-txt{font-family:var(--font-text);font-size:17px;font-weight:400;line-height:1.47;}
+  .caption{font-family:var(--font-text);font-size:14px;font-weight:400;line-height:1.43;}
+  .caption-strong{font-family:var(--font-text);font-size:14px;font-weight:600;line-height:1.29;}
+  .fine-print{font-family:var(--font-text);font-size:12px;font-weight:400;line-height:1.4;}
+  .nav-link{font-family:var(--font-text);font-size:12px;font-weight:400;line-height:1;}
+
+  @media (max-width:640px){
+    .hero-display{font-size:34px;}
+    .display-lg{font-size:28px;}
+    .lead{font-size:19px;}
+  }
+
+  /* ---------- global nav ---------- */
+  .gnav{
+    position:sticky;top:0;z-index:50;
+    background:var(--color-black);
+    color:var(--color-on-dark);
+    height:44px;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 20px;
+  }
+  .gnav-brand{font-family:var(--font-text);font-size:14px;font-weight:600;letter-spacing:-.1px;color:#fff;display:flex;align-items:center;gap:6px;}
+  .lang-switch{display:flex;gap:2px;background:rgba(255,255,255,.08);border-radius:var(--radius-pill);padding:2px;}
+  .lang-btn{
+    border:none;background:transparent;color:rgba(255,255,255,.65);
+    font-family:var(--font-text);font-size:12px;font-weight:500;
+    padding:5px 12px;border-radius:var(--radius-pill);
+  }
+  .lang-btn[aria-pressed="true"]{background:var(--color-primary);color:#fff;}
+
+  /* ---------- hero ---------- */
+  .hero{
+    background:var(--bg-tile);
+    padding:56px 20px 40px;
+    text-align:center;
+  }
+  .hero-inner{max-width:720px;margin:0 auto;}
+  .hero .lead{color:var(--text-secondary);margin-top:12px;}
+  .search-wrap{margin-top:32px;display:flex;justify-content:center;}
+  .search-input{
+    width:100%;max-width:520px;height:44px;
+    background:var(--bg-canvas);color:var(--text-primary);
+    border:1px solid var(--border-hairline);border-radius:var(--radius-pill);
+    padding:0 20px;font-size:17px;
+  }
+  .search-input::placeholder{color:var(--text-tertiary);}
+  .tabs{display:flex;justify-content:center;gap:10px;margin-top:24px;}
+  .tab-btn{
+    border-radius:var(--radius-pill);padding:9px 20px;font-size:14px;font-weight:500;
+    border:1px solid var(--accent);background:transparent;color:var(--accent);
+  }
+  .tab-btn[aria-selected="true"]{background:var(--accent);color:#fff;}
+
+  /* ---------- filters ---------- */
+  .filters{max-width:1100px;margin:0 auto;padding:28px 20px 0;}
+  .filters-label{color:var(--text-tertiary);margin-bottom:10px;}
+  .chip-row{display:flex;flex-wrap:wrap;gap:8px;}
+  .filter-chip{
+    display:inline-flex;align-items:center;gap:6px;
+    background:var(--bg-chip);color:var(--text-primary);
+    border:1px solid var(--border-hairline);border-radius:var(--radius-pill);
+    padding:8px 14px;font-size:14px;
+  }
+  .filter-chip[aria-pressed="true"]{border:2px solid var(--accent-focus);color:var(--accent);padding:7px 13px;}
+
+  /* ---------- results meta ---------- */
+  .results-meta{max-width:1100px;margin:20px auto 0;padding:0 20px;color:var(--text-tertiary);}
+
+  /* ---------- grid ---------- */
+  .grid{
+    max-width:1100px;margin:0 auto;padding:16px 20px 80px;
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;
+  }
+  .card{
+    background:var(--bg-canvas);border:1px solid var(--border-hairline);
+    border-radius:var(--radius-lg);padding:24px;
+    display:flex;flex-direction:column;gap:14px;position:relative;
+  }
+  .card-top{display:flex;gap:14px;align-items:flex-start;}
+  .tile-emoji{
+    flex:none;width:60px;height:60px;border-radius:var(--radius-sm);
+    background:var(--bg-tile);display:flex;align-items:center;justify-content:center;
+    font-size:30px;box-shadow:var(--shadow-product);
+  }
+  .card-name{flex:1;min-width:0;}
+  .card-name .native{color:var(--text-tertiary);margin-top:2px;}
+  .save-btn{
+    position:absolute;top:16px;right:16px;
+    background:transparent;border:none;font-size:20px;line-height:1;
+    color:var(--text-tertiary);padding:4px;
+  }
+  .save-btn[aria-pressed="true"]{color:var(--accent);}
+
+  .spice-row{display:flex;align-items:center;gap:8px;}
+  .pips{display:inline-flex;gap:3px;}
+  .pip{width:8px;height:8px;border-radius:50%;background:var(--pip-empty);}
+  .pip.filled{background:var(--pip-filled);}
+  .spice-text{color:var(--text-tertiary);}
+
+  .field-label{color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.06em;font-size:11px;font-weight:600;margin-bottom:3px;}
+  .field-value{color:var(--text-secondary);}
+
+  .badge-row{display:flex;flex-wrap:wrap;gap:6px;}
+  .badge{
+    display:inline-flex;align-items:center;gap:4px;
+    background:var(--bg-pearl);border:1px solid var(--border-hairline);
+    border-radius:var(--radius-md);padding:4px 10px;color:var(--text-secondary);
+  }
+
+  .tip-box{
+    background:var(--bg-pearl);border-radius:var(--radius-sm);
+    padding:10px 12px;color:var(--text-tertiary);
+  }
+
+  .empty-state{
+    max-width:520px;margin:40px auto 100px;text-align:center;
+    color:var(--text-tertiary);padding:0 20px;
+  }
+  .empty-state .glyph{font-size:40px;margin-bottom:12px;}
+
+  /* ---------- footer ---------- */
+  .site-footer{
+    background:var(--bg-tile);color:var(--text-tertiary);
+    padding:40px 20px;text-align:center;
+  }
+
+  @media (max-width:480px){
+    .hero{padding:40px 16px 32px;}
+  }
+
+  /* ---------- card interaction ---------- */
+  .card{cursor:pointer;transition:border-color .15s;}
+  .card:hover,.card:focus-visible{border-color:var(--accent);}
+  button:active,.card:active,.btn-find:active{transform:scale(.96);}
+
+  .badge.badge-adventurous{border-color:var(--accent);color:var(--accent);}
+
+  /* ---------- detail modal ---------- */
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(0,0,0,.5);
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;z-index:200;
+  }
+  .modal-panel{
+    background:var(--bg-canvas);border-radius:var(--radius-lg);
+    max-width:560px;width:100%;max-height:85vh;overflow-y:auto;
+    padding:32px;position:relative;display:flex;flex-direction:column;gap:16px;
+  }
+  .modal-close{
+    position:absolute;top:16px;right:16px;
+    background:var(--bg-pearl);border:1px solid var(--border-hairline);
+    border-radius:50%;width:32px;height:32px;font-size:16px;
+    color:var(--text-secondary);line-height:1;
+  }
+  .modal-tile{width:76px;height:76px;font-size:38px;}
+  .modal-about{color:var(--text-secondary);}
+  .pairing-box{color:var(--text-secondary);}
+  .btn-find{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    background:var(--accent);color:#fff;text-decoration:none;
+    border-radius:var(--radius-pill);padding:14px 22px;
+    font-size:16px;font-weight:500;margin-top:4px;
+  }
+</style>
+
+<div id="app"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var DATA = [
+    {id:"kimchi-jjigae", emoji:"🍲", spice:3, vegan:false, vegetarian:false, halal:false, pork:true, seafood:false,
+      name:{ko:"김치찌개", en:"Kimchi Jjigae", zh:"泡菜锅"},
+      ingredients:{ko:"돼지고기, 신 김치, 두부, 대파, 마늘", en:"Pork, aged kimchi, tofu, scallion, garlic", zh:"猪肉、熟成泡菜、豆腐、大葱、大蒜"},
+      taste:{ko:"새콤하고 얼큰한 국물이 매력적인 찌개", en:"A tangy, deeply spicy stew built on fermented kimchi", zh:"酸辣浓郁的经典炖汤"},
+      tip:{ko:"밥 한 공기와 함께, 국물에 밥을 말아 먹어보세요", en:"Best with a bowl of rice — try mixing rice right into the broth", zh:"配米饭吃最好,也可以把米饭泡进汤里"},
+      about:{ko:"한국 가정식의 대표주자로, 오래된 김치를 활용해 만드는 국민 찌개예요.", en:"A Korean home-cooking staple that turns well-fermented kimchi into a comforting, hearty stew.", zh:"韩国家常菜代表,用熟成泡菜炖煮而成的国民锅物。"},
+      pairing:{ko:"소주와 잘 어울려요", en:"Pairs well with soju", zh:"适合搭配烧酒"}},
+    {id:"doenjang-jjigae", emoji:"🥘", spice:1, vegan:false, vegetarian:false, halal:true, pork:false, seafood:true,
+      name:{ko:"된장찌개", en:"Doenjang Jjigae", zh:"大酱汤"},
+      ingredients:{ko:"된장, 두부, 애호박, 감자, 멸치육수", en:"Fermented soybean paste, tofu, zucchini, potato, anchovy broth", zh:"大酱、豆腐、西葫芦、土豆、鳀鱼高汤"},
+      taste:{ko:"구수하고 짭짤한 발효콩 된장 국물", en:"Earthy, savory broth from fermented soybeans", zh:"浓郁咸香的发酵大豆汤"},
+      tip:{ko:"쌈채소에 밥과 함께 싸 먹으면 더 맛있어요", en:"Pair with rice wrapped in lettuce for the full experience", zh:"搭配生菜包饭吃更地道"},
+      about:{ko:"된장을 발효시켜 만든 구수한 국물로, 삼겹살 구이와 세트로 자주 나와요.", en:"Made from fermented soybean paste, this savory stew is often served alongside grilled pork belly.", zh:"用发酵大酱炖煮的家常汤,常与烤五花肉搭配上桌。"},
+      pairing:{ko:"쌀밥과 함께 먹는 게 기본", en:"Always served with a bowl of steamed rice", zh:"通常配米饭一起食用"}},
+    {id:"bulgogi", emoji:"🥩", spice:0, vegan:false, vegetarian:false, halal:true, pork:false, seafood:false,
+      name:{ko:"불고기", en:"Bulgogi", zh:"烤牛肉"},
+      ingredients:{ko:"얇게 썬 소고기, 간장, 배, 마늘, 참기름", en:"Thinly sliced beef, soy sauce, pear, garlic, sesame oil", zh:"薄切牛肉、酱油、梨、大蒜、香油"},
+      taste:{ko:"달콤 짭짤하게 양념된 부드러운 불고기", en:"Sweet-savory marinated beef, tender and smoky", zh:"甜咸交融、口感软嫩"},
+      tip:{ko:"상추에 밥과 함께 싸서 쌈으로 먹어보세요", en:"Wrap a bite in lettuce with rice for a classic ssam", zh:"用生菜包着米饭和牛肉一起吃"},
+      about:{ko:"간장 베이스 양념에 재운 소고기를 구워내는 요리로, 외국인에게 가장 사랑받는 한식 중 하나예요.", en:"Beef marinated in a soy-based sauce and grilled — one of the most beloved Korean dishes among visitors.", zh:"用酱油基底腌料烤制的牛肉,是外国游客最爱的韩食之一。"},
+      pairing:{ko:"상추쌈, 흰쌀밥과 잘 어울려요", en:"Great wrapped in lettuce with a side of rice", zh:"适合用生菜包着米饭一起吃"}},
+    {id:"samgyeopsal", emoji:"🥓", spice:0, vegan:false, vegetarian:false, halal:false, pork:true, seafood:false,
+      name:{ko:"삼겹살", en:"Samgyeopsal", zh:"五花肉"},
+      ingredients:{ko:"두꺼운 삼겹살, 소금, 상추, 마늘, 쌈장", en:"Thick-cut pork belly, salt, lettuce, garlic, ssamjang dip", zh:"厚切五花肉、盐、生菜、大蒜、包饭酱"},
+      taste:{ko:"불판에 직접 구워 먹는 고소한 돼지고기", en:"Smoky, rich pork grilled tableside", zh:"现场烤制、香气四溢的猪肉"},
+      tip:{ko:"직접 구워서 상추와 쌈장에 싸 먹는 게 정석", en:"Grill it yourself, then wrap in lettuce with ssamjang", zh:"自己动手烤,包生菜蘸酱吃才正宗"},
+      about:{ko:"한국인의 회식 자리에 빠지지 않는 메뉴로, 직접 구워 먹는 재미가 있어요.", en:"A staple of Korean group dinners — half the fun is grilling it yourself at the table.", zh:"韩国人聚餐必点菜品,自己动手烤制别有乐趣。"},
+      pairing:{ko:"소주 한 잔과 찰떡궁합", en:"The classic pairing is a shot of soju", zh:"配烧酒堪称绝配"}},
+    {id:"bibimbap", emoji:"🍚", spice:2, vegan:true, vegetarian:true, halal:true, pork:false, seafood:false,
+      name:{ko:"비빔밥", en:"Bibimbap", zh:"拌饭"},
+      ingredients:{ko:"밥, 나물, 고추장, 계란(선택), 참기름", en:"Rice, seasoned vegetables, gochujang, optional egg, sesame oil", zh:"米饭、拌菜、辣椒酱、鸡蛋(可选)、香油"},
+      taste:{ko:"매콤달콤한 고추장에 비벼 먹는 채소 비빔밥", en:"Vegetables and rice tossed with sweet-spicy chili paste", zh:"拌入辣椒酱的甜辣蔬菜拌饭"},
+      tip:{ko:"먹기 전에 골고루 세게 비벼야 제맛", en:"Mix everything thoroughly before your first bite", zh:"吃之前一定要充分搅拌"},
+      about:{ko:"다양한 나물과 밥을 고추장에 비벼 먹는 균형 잡힌 한 그릇 요리예요. 돌솥에 담아내는 버전도 인기가 많아요.", en:"A balanced one-bowl meal of rice and seasoned vegetables — often served sizzling in a hot stone pot (dolsot).", zh:"米饭与拌菜拌入辣椒酱的均衡一碗餐,石锅版本也很受欢迎。"},
+      pairing:{ko:"계란후라이를 올리면 더 고소해요", en:"Ask for a fried egg on top for extra richness", zh:"加个煎蛋会更香浓"}},
+    {id:"tteokbokki", emoji:"🍢", spice:4, vegan:false, vegetarian:false, halal:true, pork:false, seafood:true,
+      name:{ko:"떡볶이", en:"Tteokbokki", zh:"辣炒年糕"},
+      ingredients:{ko:"가래떡, 고추장, 어묵, 대파, 설탕", en:"Rice cakes, gochujang sauce, fish cake, scallion, sugar", zh:"年糕、辣椒酱、鱼糕、大葱、糖"},
+      taste:{ko:"쫀득한 떡과 매콤달콤한 소스의 길거리 간식", en:"Chewy rice cakes in a sweet, fiery red sauce", zh:"Q弹年糕配甜辣酱汁的街头小吃"},
+      tip:{ko:"치즈나 튀김을 추가하면 매운맛이 순해져요", en:"Add cheese or tempura to mellow the heat", zh:"加芝士或天妇罗能中和辣味"},
+      about:{ko:"포장마차와 분식집의 대표 메뉴로, 한국 학생들의 방과 후 국민 간식이에요.", en:"The signature dish of Korean street food stalls — a classic after-school snack for students.", zh:"路边摊和小吃店的代表菜品,是韩国学生放学后的国民小吃。"},
+      pairing:{ko:"튀김이나 순대와 함께 먹는 게 국룰", en:"Traditionally shared with fried snacks (twigim) or sundae", zh:"通常搭配炸物或血肠一起吃"}},
+    {id:"sundubu-jjigae", emoji:"🥣", spice:3, vegan:false, vegetarian:false, halal:true, pork:false, seafood:true,
+      name:{ko:"순두부찌개", en:"Sundubu Jjigae", zh:"嫩豆腐汤"},
+      ingredients:{ko:"순두부, 해물 또는 돼지고기, 고춧가루, 계란", en:"Soft tofu, seafood or pork, chili flakes, raw egg", zh:"嫩豆腐、海鲜或猪肉、辣椒粉、鸡蛋"},
+      taste:{ko:"보글보글 끓인 부드러운 매운 순두부찌개", en:"Silky tofu in a bubbling, fiery hot broth", zh:"咕嘟冒泡的嫩豆腐辣汤"},
+      tip:{ko:"펄펄 끓는 상태로 나오니 계란을 바로 풀어 넣으세요", en:"It arrives boiling — crack the egg in right away to cook it gently", zh:"上桌时滚烫,趁热打入鸡蛋"},
+      about:{ko:"몽글몽글한 순두부를 매운 국물에 끓여내는 찌개로, 뚝배기째 펄펄 끓는 상태로 나와요.", en:"Silky uncurdled tofu simmered in a spicy broth, served bubbling hot in a stone pot.", zh:"嫩滑的豆腐在辣汤中炖煮,以砂锅滚烫上桌。"},
+      pairing:{ko:"공깃밥을 국물에 말아 먹어보세요", en:"Mix a bowl of rice right into the broth", zh:"可以把米饭泡进汤里吃"}},
+    {id:"gimbap", emoji:"🍙", spice:0, vegan:true, vegetarian:true, halal:true, pork:false, seafood:false,
+      name:{ko:"김밥", en:"Gimbap", zh:"紫菜包饭"},
+      ingredients:{ko:"김, 밥, 단무지, 당근, 시금치, 계란", en:"Seaweed, rice, pickled radish, carrot, spinach, egg", zh:"紫菜、米饭、腌萝卜、胡萝卜、菠菜、鸡蛋"},
+      taste:{ko:"고소한 김과 아삭한 채소가 어우러진 김밥", en:"Savory seaweed rolled around crisp vegetables and rice", zh:"海苔包裹爽脆蔬菜与米饭"},
+      tip:{ko:"한 손으로 들고 먹기 좋은 이동식 간편식", en:"A perfect handheld meal for eating on the go", zh:"适合边走边吃的便携餐点"},
+      about:{ko:"저렴하고 빠르게 먹을 수 있어 한국인의 대표적인 나들이·간편식이에요.", en:"An affordable, quick meal — Korea's go-to for picnics and lunch on the go.", zh:"价格实惠、方便快捷,是韩国人郊游和简餐的首选。"},
+      pairing:{ko:"단무지와 함께 먹으면 개운해요", en:"Eaten with pickled radish for a refreshing crunch", zh:"配腌萝卜吃更清爽"}},
+    {id:"japchae", emoji:"🍝", spice:0, vegan:true, vegetarian:true, halal:true, pork:false, seafood:false,
+      name:{ko:"잡채", en:"Japchae", zh:"炒杂菜"},
+      ingredients:{ko:"당면, 시금치, 당근, 버섯, 간장, 참기름", en:"Glass noodles, spinach, carrot, mushroom, soy sauce, sesame oil", zh:"粉丝、菠菜、胡萝卜、蘑菇、酱油、香油"},
+      taste:{ko:"쫄깃한 당면과 채소를 참기름에 볶은 요리", en:"Chewy glass noodles stir-fried with vegetables in sesame oil", zh:"Q弹粉丝与蔬菜的香油炒制"},
+      tip:{ko:"잔치 음식이라 명절이나 파티에서 자주 볼 수 있어요", en:"A festive dish often served at celebrations and parties", zh:"喜庆场合和聚会中的常见菜"},
+      about:{ko:"당면의 쫄깃한 식감이 매력적인 요리로, 명절이나 잔치상에 자주 올라가요.", en:"Prized for its chewy noodle texture, this dish is a fixture at Korean holidays and celebrations.", zh:"以粉丝的Q弹口感为特色,常出现在节日和喜宴餐桌上。"},
+      pairing:{ko:"밥반찬으로도, 단독으로도 좋아요", en:"Enjoyed either as a side dish or a standalone meal", zh:"既可作配菜,也可单独享用"}},
+    {id:"samgyetang", emoji:"🐔", spice:0, vegan:false, vegetarian:false, halal:true, pork:false, seafood:false,
+      name:{ko:"삼계탕", en:"Samgyetang", zh:"参鸡汤"},
+      ingredients:{ko:"영계, 찹쌀, 인삼, 대추, 마늘", en:"Young whole chicken, sticky rice, ginseng, jujube, garlic", zh:"童子鸡、糯米、人参、红枣、大蒜"},
+      taste:{ko:"담백하고 깊은 인삼 향이 나는 보양식", en:"A mild, restorative soup fragrant with ginseng", zh:"清淡滋补、带有人参香气"},
+      tip:{ko:"소금을 살짝 찍어 국물과 함께 드세요", en:"Dip the chicken lightly in salt and sip the broth", zh:"蘸少许盐,配着汤一起喝"},
+      about:{ko:"삼복더위에 원기를 보충하려고 먹는 보양식으로, 여름철 인기가 특히 높아요.", en:"A restorative soup traditionally eaten during Korea's hottest summer days to fight fatigue with heat.", zh:"传统上在三伏天食用的滋补汤品,盛夏时节尤其受欢迎。"},
+      pairing:{ko:"인삼주 한잔을 곁들이기도 해요", en:"Sometimes paired with a small cup of ginseng liquor", zh:"有时会搭配一小杯人参酒"}},
+    {id:"naengmyeon", emoji:"🍜", spice:1, vegan:false, vegetarian:false, halal:true, pork:false, seafood:false,
+      name:{ko:"냉면", en:"Naengmyeon", zh:"冷面"},
+      ingredients:{ko:"메밀면, 차가운 육수(또는 양념장), 오이, 배, 삶은 계란", en:"Buckwheat noodles, cold broth or spicy sauce, cucumber, pear, boiled egg", zh:"荞麦面、冷汤或辣酱、黄瓜、梨、水煮蛋"},
+      taste:{ko:"시원한 물냉면과 매콤한 비빔냉면 두 종류가 있어요", en:"Comes chilled in broth (mul) or tossed spicy (bibim)", zh:"分为清爽冷汤(水冷面)和辣拌两种"},
+      tip:{ko:"면을 가위로 잘라 먹으면 훨씬 편해요", en:"Ask for scissors to cut the long noodles for easier eating", zh:"可以用剪刀剪断面条更方便食用"},
+      about:{ko:"평양식 물냉면과 함흥식 비빔냉면 두 계보가 있으며, 여름철 대표 별미예요.", en:"Comes in two lineages — Pyongyang-style (cold broth) and Hamhung-style (spicy, tossed) — a favorite in summer.", zh:"分为平壤式(冷汤)和咸兴式(拌辣酱)两大流派,是夏季代表美食。"},
+      pairing:{ko:"삶은 계란을 반으로 갈라 곁들여요", en:"Usually topped with half a boiled egg", zh:"通常会配半个水煮蛋"}},
+    {id:"galbitang", emoji:"🍖", spice:0, vegan:false, vegetarian:false, halal:true, pork:false, seafood:false,
+      name:{ko:"갈비탕", en:"Galbitang", zh:"排骨汤"},
+      ingredients:{ko:"소갈비, 무, 당면, 대파, 마늘", en:"Beef short ribs, radish, glass noodles, scallion, garlic", zh:"牛排骨、萝卜、粉丝、大葱、大蒜"},
+      taste:{ko:"맑고 깊은 맛의 담백한 갈비탕", en:"A clear, deeply savory broth with tender rib meat", zh:"清澈浓郁、味道醇厚的排骨汤"},
+      tip:{ko:"밥을 국물에 말아서 뜨끈하게 먹어보세요", en:"Add rice straight into the broth and eat it piping hot", zh:"把米饭泡进汤里趁热吃"},
+      about:{ko:"명절이나 특별한 날 손님상에 자주 오르는 격식 있는 국물 요리예요.", en:"A more formal soup often served on holidays or to welcome guests.", zh:"节日或招待客人时常见的正式汤品。"},
+      pairing:{ko:"깍두기와 잘 어울려요", en:"Pairs nicely with cubed radish kimchi (kkakdugi)", zh:"适合搭配萝卜块泡菜"}},
+    {id:"pajeon", emoji:"🥞", spice:0, vegan:false, vegetarian:true, halal:true, pork:false, seafood:true,
+      name:{ko:"파전", en:"Pajeon", zh:"葱煎饼"},
+      ingredients:{ko:"밀가루, 대파, 계란, 해산물(선택)", en:"Flour, scallion, egg, optional seafood", zh:"面粉、大葱、鸡蛋、海鲜(可选)"},
+      taste:{ko:"바삭하게 부친 짭짤한 파전", en:"A crispy, savory pancake loaded with scallions", zh:"煎得酥脆咸香的葱饼"},
+      tip:{ko:"간장과 식초를 섞은 소스에 찍어 드세요", en:"Dip each bite in soy-vinegar sauce", zh:"蘸酱油醋汁食用更香"},
+      about:{ko:"비 오는 날 막걸리와 함께 즐기는 대표적인 한국식 안주예요.", en:"A classic Korean bar snack traditionally enjoyed with makgeolli on rainy days.", zh:"下雨天常与米酒一起享用的经典韩式下酒菜。"},
+      pairing:{ko:"막걸리와 환상의 궁합", en:"The classic pairing is makgeolli rice wine", zh:"与米酒堪称绝配"}},
+    {id:"mandu", emoji:"🥟", spice:0, vegan:false, vegetarian:false, halal:false, pork:true, seafood:false,
+      name:{ko:"만두", en:"Mandu", zh:"饺子"},
+      ingredients:{ko:"만두피, 돼지고기 또는 채소, 두부, 부추", en:"Dumpling wrapper, pork or vegetables, tofu, chives", zh:"饺子皮、猪肉或蔬菜、豆腐、韭菜"},
+      taste:{ko:"육즙 가득한 소를 감싼 쫄깃한 만두", en:"Juicy filling wrapped in a chewy dumpling skin", zh:"多汁馅料包裹在有嚼劲的饺子皮中"},
+      tip:{ko:"찐만두, 군만두, 만둣국 등 조리법이 다양해요", en:"Try it steamed, pan-fried, or in soup — each way tastes different", zh:"可蒸、可煎、也可做成汤饺,吃法多样"},
+      about:{ko:"설날에 먹는 떡만둣국처럼 한국 명절 음식에도 자주 등장해요.", en:"Also appears in festive dishes like tteok-mandu-guk, eaten on Korean New Year.", zh:"也常出现在节日料理中,例如韩国新年吃的年糕饺子汤。"},
+      pairing:{ko:"간장 식초 소스에 찍어 드세요", en:"Dip in soy-vinegar sauce", zh:"蘸酱油醋汁食用"}},
+    {id:"fried-chicken", emoji:"🍗", spice:2, vegan:false, vegetarian:false, halal:false, pork:false, seafood:false,
+      name:{ko:"치킨", en:"Korean Fried Chicken", zh:"韩式炸鸡"},
+      ingredients:{ko:"닭고기, 튀김옷, (선택)고추장 양념 소스", en:"Chicken, crispy batter, optional sweet-spicy glaze", zh:"鸡肉、酥脆炸粉、(可选)甜辣酱"},
+      taste:{ko:"겉은 바삭, 속은 촉촉한 프라이드 치킨", en:"Ultra-crispy outside, juicy inside", zh:"外酥里嫩的炸鸡"},
+      tip:{ko:"무피클과 함께 먹으면 느끼함이 사라져요", en:"Pair with pickled radish to cut the richness", zh:"搭配腌萝卜解腻更佳"},
+      about:{ko:"치킨과 맥주를 함께 즐기는 '치맥' 문화는 한국의 대표적인 밤 문화예요.", en:"Pairing fried chicken with beer — called 'chimaek' — is a beloved Korean nightlife tradition.", zh:"炸鸡配啤酒的“炸鸡啤酒(chimaek)”文化是韩国代表性的夜生活方式。"},
+      pairing:{ko:"맥주와 함께 '치맥'으로!", en:"Best enjoyed as 'chimaek' — chicken and beer", zh:"最佳搭档是啤酒,组成“炸鸡啤酒”"}},
+    {id:"kimchi", emoji:"🥬", spice:2, vegan:false, vegetarian:false, halal:true, pork:false, seafood:true,
+      name:{ko:"김치", en:"Kimchi", zh:"泡菜"},
+      ingredients:{ko:"배추, 고춧가루, 마늘, 생강, 젓갈", en:"Napa cabbage, chili flakes, garlic, ginger, fermented seafood seasoning", zh:"白菜、辣椒粉、大蒜、生姜、鱼露/虾酱"},
+      taste:{ko:"새콤하고 알싸하게 발효된 매운 배추절임", en:"Tangy, funky, and spicy — Korea's iconic fermented side dish", zh:"酸辣发酵的韩国经典泡菜"},
+      tip:{ko:"거의 모든 한식에 곁들여 나오는 기본 반찬이에요", en:"Served as a side with almost every Korean meal", zh:"几乎搭配所有韩餐的基本小菜"},
+      about:{ko:"집집마다, 지역마다 맛이 다른 발효 반찬으로, 200가지가 넘는 종류가 있다고 알려져 있어요.", en:"A fermented side dish with flavor that varies by household and region — over 200 known varieties exist.", zh:"发酵小菜,因家庭和地区而风味各异,据称有200多种。"},
+      pairing:{ko:"거의 모든 한식과 함께 나와요", en:"Served alongside nearly every Korean meal", zh:"几乎搭配所有韩餐"}},
+    {id:"jjajangmyeon", emoji:"🍛", spice:0, vegan:false, vegetarian:false, halal:false, pork:true, seafood:false,
+      name:{ko:"짜장면", en:"Jjajangmyeon", zh:"炸酱面"},
+      ingredients:{ko:"면, 춘장(검은콩 소스), 돼지고기, 양파, 감자", en:"Noodles, black bean sauce, pork, onion, potato", zh:"面条、炸酱(黑豆酱)、猪肉、洋葱、土豆"},
+      taste:{ko:"달콤 짭짤한 춘장 소스를 비벼 먹는 중화요리", en:"Noodles tossed in a sweet, savory black bean sauce", zh:"拌着甜咸黑豆酱吃的中式面条"},
+      tip:{ko:"이사하는 날 자주 시켜 먹는 국민 배달 음식", en:"A classic delivery order, famously eaten on moving day", zh:"韩国人搬家时最常点的外卖美食"},
+      about:{ko:"한국식으로 재해석된 중화요리로, 중국집에서 가장 많이 주문하는 메뉴예요.", en:"A Korean-Chinese fusion dish — the single most ordered item at Korean-Chinese restaurants.", zh:"韩式改良的中华料理,是中华料理店点单率最高的菜品。"},
+      pairing:{ko:"단무지와 양파를 곁들여 먹어요", en:"Served with pickled radish and raw onion on the side", zh:"通常配腌萝卜和生洋葱"}},
+    {id:"jjamppong", emoji:"🦑", spice:3, vegan:false, vegetarian:false, halal:true, pork:false, seafood:true,
+      name:{ko:"짬뽕", en:"Jjamppong", zh:"什锦海鲜辣面"},
+      ingredients:{ko:"면, 해산물, 채소, 매운 고추기름 국물", en:"Noodles, seafood, vegetables, spicy chili-oil broth", zh:"面条、海鲜、蔬菜、辣椒油辣汤"},
+      taste:{ko:"얼큰하고 진한 해물 육수의 매운 짬뽕", en:"A fiery, richly flavored seafood noodle soup", zh:"浓郁鲜辣的海鲜辣汤面"},
+      tip:{ko:"국물까지 다 마실 만큼 시원하고 얼큰해요", en:"The broth is so good, many finish every drop", zh:"汤汁鲜辣,很多人会喝到一滴不剩"},
+      about:{ko:"짜장면과 함께 중국집 양대 메뉴로 꼽히는 얼큰한 해물면 요리예요.", en:"The spicy counterpart to jjajangmyeon — together they're the two pillars of Korean-Chinese menus.", zh:"与炸酱面并列中华料理店两大招牌,是辣味海鲜面料理。"},
+      pairing:{ko:"짜장면과 반반 주문도 가능해요", en:"Many restaurants let you order it half-and-half with jjajangmyeon", zh:"很多店可以点“炸酱+辣海鲜面”各半"}},
+    {id:"tangsuyuk", emoji:"🍤", spice:0, vegan:false, vegetarian:false, halal:false, pork:true, seafood:false,
+      name:{ko:"탕수육", en:"Tangsuyuk", zh:"糖醋肉"},
+      ingredients:{ko:"돼지고기(또는 소고기), 튀김옷, 새콤달콤한 소스, 채소", en:"Pork or beef, crispy batter, sweet-and-sour sauce, vegetables", zh:"猪肉或牛肉、酥炸外皮、糖醋汁、蔬菜"},
+      taste:{ko:"바삭한 튀김에 새콤달콤한 소스를 곁들인 요리", en:"Crispy fried meat glazed with a bright, tangy-sweet sauce", zh:"酥脆炸肉配酸甜酱汁"},
+      tip:{ko:"부먹과 찍먹 논쟁으로 유명해요(소스를 붓거나 찍거나)", en:"Famous debate: sauce poured on top, or served on the side for dipping?", zh:"关于“淋汁”还是“蘸汁”的经典争论"},
+      about:{ko:"손님 접대나 회식에 자주 곁들여 나오는 중화요리 코스 메뉴예요.", en:"A go-to course dish for hosting guests or group dinners at Korean-Chinese restaurants.", zh:"招待客人或聚餐时常点的中华料理套餐菜品。"},
+      pairing:{ko:"짜장면이나 짬뽕과 함께 주문해요", en:"Usually ordered alongside jjajangmyeon or jjamppong", zh:"通常与炸酱面或辣海鲜面一起点"}},
+    {id:"budae-jjigae", emoji:"🧀", spice:2, vegan:false, vegetarian:false, halal:false, pork:true, seafood:false,
+      name:{ko:"부대찌개", en:"Budae Jjigae", zh:"部队锅"},
+      ingredients:{ko:"스팸, 소시지, 김치, 라면사리, 치즈", en:"Spam, sausage, kimchi, ramen noodles, cheese", zh:"午餐肉、香肠、泡菜、拉面、芝士"},
+      taste:{ko:"매콤한 국물에 라면과 치즈까지 더해진 찌개", en:"A spicy stew loaded with instant noodles and melted cheese", zh:"辣汤中加入泡面和芝士的丰盛炖锅"},
+      tip:{ko:"라면 사리는 마지막에 넣어야 꼬들꼬들해요", en:"Add the ramen noodles last so they stay firm, not mushy", zh:"拉面最后放入才能保持劲道口感"},
+      about:{ko:"한국전쟁 이후 미군 부대 근처에서 유래된 퓨전 찌개로, 스팸과 라면이 특징이에요.", en:"Born near U.S. army bases after the Korean War, this fusion stew is known for its spam and instant noodles.", zh:"源自韩战后美军基地附近的融合炖锅,以午餐肉和拉面为特色。"},
+      pairing:{ko:"치즈를 추가하면 더 고소해요", en:"Add extra cheese for a richer finish", zh:"加芝士会更香浓"}},
+    {id:"dakgalbi", emoji:"🌶️", spice:3, vegan:false, vegetarian:false, halal:true, pork:false, seafood:false,
+      name:{ko:"닭갈비", en:"Dakgalbi", zh:"铁板辣鸡排"},
+      ingredients:{ko:"닭고기, 고추장 양념, 양배추, 떡, 치즈(선택)", en:"Chicken, gochujang marinade, cabbage, rice cake, optional cheese", zh:"鸡肉、辣椒酱腌料、卷心菜、年糕、芝士(可选)"},
+      taste:{ko:"철판에 볶아낸 매콤달콤한 닭갈비", en:"Spicy-sweet chicken stir-fried on a hot griddle", zh:"铁板炒制的甜辣鸡肉"},
+      tip:{ko:"마지막엔 볶음밥으로 마무리하는 게 국룰", en:"Finish the meal with fried rice cooked right in the leftover sauce", zh:"最后一定要用剩下的酱汁炒饭收尾"},
+      about:{ko:"강원도 춘천의 향토 음식으로, 매콤한 양념에 볶은 닭고기가 특징이에요.", en:"A regional specialty from Chuncheon, known for its spicy chicken stir-fried tableside.", zh:"江原道春川的地方特色菜,以辣味炒鸡肉闻名。"},
+      pairing:{ko:"식사 후 볶음밥으로 마무리해요", en:"Finish the meal with fried rice in the leftover sauce", zh:"最后用剩下的酱汁炒饭收尾"}},
+    {id:"hotteok", emoji:"🫓", spice:0, vegan:false, vegetarian:true, halal:true, pork:false, seafood:false,
+      name:{ko:"호떡", en:"Hotteok", zh:"糖饼"},
+      ingredients:{ko:"밀가루 반죽, 흑설탕, 계피, 견과류", en:"Wheat dough, brown sugar, cinnamon, nuts", zh:"面粉面团、红糖、肉桂、坚果"},
+      taste:{ko:"겉은 바삭, 속은 달콤한 시럽이 가득한 길거리 간식", en:"Crispy outside, oozing with warm cinnamon-sugar syrup inside", zh:"外酥内软,内馅是温热的肉桂糖浆"},
+      tip:{ko:"뜨거우니 한 김 식힌 후 한입 베어 무세요", en:"Let it cool for a moment — the syrup filling is very hot", zh:"刚出炉很烫,稍凉后再咬一口"},
+      about:{ko:"겨울철 길거리에서 만날 수 있는 따뜻한 국민 간식이에요.", en:"A warm, beloved street snack most often found in winter.", zh:"冬季街头常见的暖心国民小吃。"},
+      pairing:{ko:"씨앗 호떡(견과류 가득)도 인기예요", en:"Try 'ssiat hotteok' — the seed-and-nut-filled variation", zh:"也可以尝试坚果馅的“씨앗호떡”"}},
+
+    {id:"beondegi", emoji:"🐛", spice:0, vegan:false, vegetarian:false, halal:false, pork:false, seafood:false, adventurous:true,
+      name:{ko:"번데기", en:"Beondegi (Silkworm Pupae)", zh:"蚕蛹"},
+      ingredients:{ko:"누에 번데기, 간장 육수, 향신료", en:"Silkworm pupae, soy-seasoned broth, spices", zh:"蚕蛹、酱油高汤、香料"},
+      taste:{ko:"고소하면서도 특유의 향이 강한 별미 간식", en:"Nutty and savory, with a distinctive aroma that takes some getting used to", zh:"香浓中带有独特气味的特色小吃"},
+      tip:{ko:"포장마차의 클래식 간식, 작은 컵에 담아 팔아요", en:"A street-cart classic, sold in small paper cups", zh:"路边摊的经典小吃,常用小纸杯盛装出售"},
+      about:{ko:"한국인에게도 호불호가 갈리는 추억의 간식으로, 시장이나 포장마차에서 쉽게 볼 수 있어요.", en:"A nostalgic snack that even divides opinion among Koreans — commonly found at markets and street carts.", zh:"连韩国人也各有喜好的怀旧小吃,市场和路边摊很常见。"},
+      pairing:{ko:"이쑤시개로 하나씩 집어 먹어요", en:"Eaten one piece at a time with a toothpick", zh:"通常用牙签一个个挑着吃"}},
+    {id:"ganjang-gejang", emoji:"🦀", spice:0, vegan:false, vegetarian:false, halal:false, pork:false, seafood:true, adventurous:true,
+      name:{ko:"간장게장", en:"Ganjang Gejang (Soy Sauce Crab)", zh:"酱油腌蟹"},
+      ingredients:{ko:"생 꽃게, 간장, 마늘, 생강, 청양고추", en:"Raw blue crab, soy sauce, garlic, ginger, hot green chili", zh:"生青蟹、酱油、大蒜、生姜、青阳辣椒"},
+      taste:{ko:"짭짤하고 진한 감칠맛의 생 게 요리", en:"Salty, deeply umami, and served raw — an acquired texture", zh:"咸香浓郁、鲜味十足的生蟹料理"},
+      tip:{ko:"게딱지에 밥을 비벼 먹는 게 하이라이트예요", en:"Don't skip mixing rice into the crab shell — it's the best part", zh:"一定要把米饭拌进蟹壳里吃,是精华所在"},
+      about:{ko:"'밥도둑'이라 불릴 만큼 밥과 잘 어울리는 인기 메뉴지만, 날 것으로 먹는 요리라 신선도가 중요해요.", en:"Nicknamed the 'rice thief' for how irresistibly well it pairs with rice — but as a raw dish, freshness matters, so order from a trusted restaurant.", zh:"被称为“偷饭贼”,因为太下饭了,但作为生食,新鲜度很重要,建议选择信誉好的餐厅。"},
+      pairing:{ko:"따뜻한 흰쌀밥과 함께 드세요", en:"Always eaten with a bowl of warm white rice", zh:"务必配温热的白米饭食用"}},
+    {id:"yukhoe", emoji:"🥩", spice:0, vegan:false, vegetarian:false, halal:true, pork:false, seafood:false, adventurous:true,
+      name:{ko:"육회", en:"Yukhoe (Korean Beef Tartare)", zh:"生拌牛肉"},
+      ingredients:{ko:"생 소고기, 배, 달걀노른자, 참기름, 마늘", en:"Raw beef, Korean pear, egg yolk, sesame oil, garlic", zh:"生牛肉、梨、蛋黄、香油、大蒜"},
+      taste:{ko:"부드럽고 달콤한 배와 어우러진 신선한 생고기 요리", en:"Cool, tender raw beef balanced by sweet pear — Korea's answer to steak tartare", zh:"口感鲜嫩,梨的清甜与生牛肉相得益彰"},
+      tip:{ko:"달걀노른자를 터뜨려 전체적으로 비벼 드세요", en:"Break the egg yolk and mix it through before eating", zh:"把蛋黄戳破拌匀后再吃"},
+      about:{ko:"믿을 수 있는 정육점이나 전문점에서 그날 손질한 신선한 소고기로 만들어요.", en:"Made fresh from beef prepared the same day at trusted butchers or specialty restaurants.", zh:"使用当天处理的新鲜牛肉,通常出自可靠的肉铺或专门店。"},
+      pairing:{ko:"배 채와 함께 한 젓가락씩 먹어요", en:"Take a bite together with the julienned pear on top", zh:"搭配上面的梨丝一起入口"}},
+    {id:"dakbal", emoji:"🦶", spice:4, vegan:false, vegetarian:false, halal:true, pork:false, seafood:false, adventurous:true,
+      name:{ko:"닭발", en:"Dakbal (Spicy Chicken Feet)", zh:"辣鸡爪"},
+      ingredients:{ko:"닭발, 고추장, 마늘, 청양고추, 물엿", en:"Chicken feet, gochujang, garlic, hot chili, corn syrup glaze", zh:"鸡爪、辣椒酱、大蒜、青阳辣椒、糖浆"},
+      taste:{ko:"쫄깃한 식감에 아주 강렬하게 매운 술안주", en:"Extremely chewy texture with an intensely spicy glaze", zh:"口感Q弹、辣度极高的下酒菜"},
+      tip:{ko:"처음이라면 뼈를 뺀 '무뼈닭발'을 추천해요", en:"First-timers should try 'muppyeo dakbal' — the boneless version", zh:"新手建议先尝试去骨版“无骨鸡爪”"},
+      about:{ko:"매운맛 순위에서 항상 상위권에 꼽히는 대표적인 매운 안주예요.", en:"Consistently ranked among Korea's spiciest bar snacks — not for the faint of heart.", zh:"常年位居韩国最辣下酒菜排行榜前列。"},
+      pairing:{ko:"시원한 맥주와 함께 매운맛을 달래요", en:"Cold beer helps tame the heat", zh:"配冰啤酒能缓解辣度"}},
+    {id:"hongeo-samhap", emoji:"🐟", spice:1, vegan:false, vegetarian:false, halal:false, pork:true, seafood:true, adventurous:true,
+      name:{ko:"홍어삼합", en:"Hongeo Samhap (Fermented Skate)", zh:"发酵鳐鱼三合"},
+      ingredients:{ko:"삭힌 홍어, 삶은 돼지고기, 묵은 김치", en:"Fermented skate, boiled pork belly, aged kimchi", zh:"发酵鳐鱼、白切猪肉、熟成泡菜"},
+      taste:{ko:"암모니아 향이 매우 강한, 호불호가 극명한 발효 음식", en:"Famously pungent with a strong ammonia smell — one of Korea's most polarizing foods", zh:"氨味极其浓烈,是韩国最具争议性的发酵美食之一"},
+      tip:{ko:"세 가지를 한 번에 싸서 먹으면 냄새가 훨씬 순해져요", en:"Wrap all three components together in one bite — it mellows the smell significantly", zh:"三样一起包着吃,气味会温和许多"},
+      about:{ko:"전라도 지방의 잔치 음식으로, 도전 정신이 필요한 대표적인 '용감한 미식' 코스예요.", en:"A celebratory dish from Korea's Jeolla region — a true rite of passage for adventurous eaters.", zh:"全罗道地区的宴席美食,是需要一点勇气的“挑战美食”代表。"},
+      pairing:{ko:"막걸리와 함께 먹는 것이 전통이에요", en:"Traditionally paired with makgeolli rice wine", zh:"传统上搭配米酒食用"}},
+    {id:"jjageuli", emoji:"🍲", spice:3, vegan:false, vegetarian:false, halal:false, pork:true, seafood:false, adventurous:true,
+      name:{ko:"짜글이", en:"Jjageuli", zh:"浓缩泡菜锅"},
+      ingredients:{ko:"김치, 돼지고기(또는 스팸), 라면사리, 진한 양념", en:"Kimchi, pork or spam, instant noodles, concentrated seasoning", zh:"泡菜、猪肉或午餐肉、拉面、浓郁调料"},
+      taste:{ko:"국물이 거의 졸아들 만큼 진하고 짭짤한 찌개", en:"Boiled down until intensely thick and savory — bolder than a regular jjigae", zh:"汤汁几乎收干,味道浓郁咸香的炖菜"},
+      tip:{ko:"밥 위에 얹어 비벼 먹는 걸 추천해요", en:"Best spooned straight over a bowl of rice", zh:"建议直接淋在米饭上拌着吃"},
+      about:{ko:"찌개보다 국물이 적고 더 진하게 졸여낸 가정식 스타일 요리예요.", en:"A homestyle dish similar to jjigae but simmered down with far less broth and much bolder flavor.", zh:"比一般炖汤汤汁更少、味道更浓的家常料理。"},
+      pairing:{ko:"소주 안주로도 인기가 많아요", en:"A popular pick as a soju side dish too", zh:"也是很受欢迎的烧酒下酒菜"}},
+    {id:"gopchang", emoji:"🫕", spice:1, vegan:false, vegetarian:false, halal:false, pork:false, seafood:false, adventurous:true,
+      name:{ko:"곱창", en:"Gopchang (Grilled Intestines)", zh:"烤肠(牛/猪小肠)"},
+      ingredients:{ko:"소 또는 돼지 곱창, 대파, 마늘, 소금 또는 양념장", en:"Beef or pork small intestine, scallion, garlic, salt or sauce", zh:"牛或猪小肠、大葱、大蒜、盐或酱料"},
+      taste:{ko:"쫄깃하고 고소한 특유의 식감이 있는 내장 구이", en:"Distinctively chewy and rich — an offal dish with real texture", zh:"口感Q弹、香浓独特的内脏烤物"},
+      tip:{ko:"기름기가 많으니 채소와 함께 곁들여 먹어요", en:"It's fatty, so pair each bite with fresh vegetables", zh:"油脂较多,建议搭配蔬菜一起吃"},
+      about:{ko:"직접 구워 먹는 재미와 쫄깃한 식감으로 마니아층이 두터운 안주 메뉴예요.", en:"A cult-favorite grilled dish loved for its chewy texture and hands-on tableside grilling.", zh:"因独特嚼劲和现烤乐趣而拥有大批忠实粉丝的下酒菜。"},
+      pairing:{ko:"소주와 함께 즐기는 대표적인 안주예요", en:"A classic soju pairing", zh:"是经典的烧酒搭档"}},
+    {id:"sannakji", emoji:"🐙", spice:0, vegan:false, vegetarian:false, halal:true, pork:false, seafood:true, adventurous:true,
+      name:{ko:"산낙지", en:"Sannakji (Live Octopus)", zh:"活章鱼"},
+      ingredients:{ko:"낙지, 참기름, 깨소금", en:"Baby octopus, sesame oil, sesame seeds", zh:"小章鱼、香油、芝麻盐"},
+      taste:{ko:"쫄깃하다 못해 입 안에서 꿈틀대는 신선함이 특징", en:"So fresh the tentacles are still moving on the plate — intensely chewy", zh:"新鲜到盘中触手仍在蠕动,口感极其Q弹"},
+      tip:{ko:"질식 위험이 있으니 꼭 꼭꼭 씹어서 삼키세요", en:"Chew thoroughly before swallowing — the suction cups can pose a choking risk", zh:"务必充分咀嚼后再吞咽,吸盘可能有噎住风险"},
+      about:{ko:"한국 여행 브이로그에 자주 등장하는 '충격 음식' 중 하나로, 살아있는 낙지를 바로 썰어 내와요.", en:"A frequent star of Korea-travel vlogs — baby octopus is sliced and served while still moving.", zh:"常出现在韩国旅行视频中的“冲击美食”,现切现吃的活章鱼。"},
+      pairing:{ko:"참기름 소금장에 찍어 먹어요", en:"Dip each piece in sesame oil and salt", zh:"蘸香油盐吃"}},
+
+    {id:"ramyeon", emoji:"🍜", spice:2, vegan:false, vegetarian:false, halal:false, pork:true, seafood:false,
+      name:{ko:"라면", en:"Ramyeon (Korean Instant Noodles)", zh:"拉面(韩式方便面)"},
+      ingredients:{ko:"면, 분말스프, 계란, 대파", en:"Noodles, powdered soup base, egg, scallion", zh:"面条、汤料包、鸡蛋、大葱"},
+      taste:{ko:"얼큰하고 짭짤한 국물의 인스턴트 라면", en:"A spicy, savory instant-noodle broth Koreans eat any time of day", zh:"汤底辛辣咸香的方便面"},
+      tip:{ko:"계란을 풀지 말고 통째로 넣으면 반숙으로 즐길 수 있어요", en:"Crack the egg in whole (don't stir) for a soft-boiled texture", zh:"鸡蛋整个打入不搅拌,可以吃到溏心口感"},
+      about:{ko:"편의점과 분식집 어디서나 쉽게 즐길 수 있는 한국인의 소울푸드예요.", en:"Available at every convenience store and snack shop — a true Korean comfort food.", zh:"便利店和小吃店随处可见,是韩国人的灵魂美食。"},
+      pairing:{ko:"김치를 곁들이면 완벽해요", en:"Perfect with a side of kimchi", zh:"配泡菜堪称完美"}},
+    {id:"galbi-grilled", emoji:"🍖", spice:0, vegan:false, vegetarian:false, halal:true, pork:false, seafood:false,
+      name:{ko:"갈비", en:"Galbi (Grilled Beef Short Ribs)", zh:"烤牛排骨"},
+      ingredients:{ko:"소갈비, 간장, 배, 마늘, 설탕", en:"Beef short ribs, soy sauce, pear, garlic, sugar", zh:"牛排骨、酱油、梨、大蒜、糖"},
+      taste:{ko:"달콤한 양념이 밴 소갈비를 직접 구워 먹는 요리", en:"Sweet, savory marinated ribs grilled tableside", zh:"甜咸入味的牛排骨,现场烤制"},
+      tip:{ko:"가위로 잘라 상추에 싸 먹어요", en:"Cut with kitchen scissors and wrap in lettuce", zh:"用剪刀剪开后配生菜包着吃"},
+      about:{ko:"특별한 날 가족 외식으로 자주 선택되는 프리미엄 구이 메뉴예요.", en:"A premium grilled dish often chosen for family celebrations and special occasions.", zh:"常在家庭聚餐或特殊日子选择的高档烤肉菜品。"},
+      pairing:{ko:"된장찌개, 냉면과 함께 코스로 즐겨요", en:"Often ordered as a course with doenjang jjigae or naengmyeon", zh:"常与大酱汤或冷面搭配成套餐"}},
+    {id:"tteokguk", emoji:"🍥", spice:0, vegan:false, vegetarian:false, halal:true, pork:false, seafood:false,
+      name:{ko:"떡국", en:"Tteokguk (Rice Cake Soup)", zh:"年糕汤"},
+      ingredients:{ko:"가래떡, 소고기 육수, 계란지단, 김가루", en:"Sliced rice cakes, beef broth, egg garnish, seaweed flakes", zh:"年糕片、牛肉高汤、蛋丝、海苔碎"},
+      taste:{ko:"담백한 육수에 쫄깃한 떡을 넣어 끓인 국물 요리", en:"A clean, mild broth with chewy rice cake slices", zh:"清淡高汤配Q弹年糕片"},
+      tip:{ko:"설날 아침에 먹으면 나이를 한 살 더 먹는다는 말이 있어요", en:"Tradition says eating it on New Year's Day adds a year to your age", zh:"传说在新年早晨吃一碗就意味着长一岁"},
+      about:{ko:"한국의 설날(음력 새해) 아침에 꼭 먹는 전통 명절 음식이에요.", en:"A must-eat tradition on Seollal, the Korean Lunar New Year morning.", zh:"韩国农历新年早晨必吃的传统节日料理。"},
+      pairing:{ko:"만두를 넣어 떡만둣국으로도 즐겨요", en:"Often combined with dumplings as tteok-mandu-guk", zh:"也常加入饺子做成年糕饺子汤"}},
+    {id:"gamjatang", emoji:"🥔", spice:2, vegan:false, vegetarian:false, halal:false, pork:true, seafood:false,
+      name:{ko:"감자탕", en:"Gamjatang (Pork Bone & Potato Stew)", zh:"土豆猪骨汤"},
+      ingredients:{ko:"돼지등뼈, 감자, 우거지, 깻잎, 고춧가루", en:"Pork spine bones, potatoes, napa cabbage leaves, perilla leaves, chili powder", zh:"猪脊骨、土豆、干白菜叶、紫苏叶、辣椒粉"},
+      taste:{ko:"진하고 얼큰한 국물에 부드럽게 익은 돼지등뼈 요리", en:"Rich, spicy broth with pork bones simmered until the meat falls off", zh:"浓郁辛辣的汤底,猪骨炖至软烂脱骨"},
+      tip:{ko:"뼈에 붙은 살을 손으로 뜯어 먹어도 괜찮아요", en:"It's totally normal to pick up the bones and eat with your hands", zh:"可以直接用手拿骨头啃肉,很正常"},
+      about:{ko:"얼큰한 국물이 해장에 좋다고 알려져 있어 다음 날 해장 메뉴로도 인기예요.", en:"Known as a great hangover cure, it's a popular next-day-recovery meal.", zh:"汤汁浓郁被认为有解酒效果,是很受欢迎的醒酒餐。"},
+      pairing:{ko:"깻잎과 들깻가루를 넣으면 향이 더 깊어져요", en:"Perilla leaves and ground sesame deepen the flavor", zh:"加入紫苏叶和芝麻粉风味更浓"}},
+    {id:"sundae", emoji:"🌭", spice:0, vegan:false, vegetarian:false, halal:false, pork:true, seafood:false, adventurous:true,
+      name:{ko:"순대", en:"Sundae (Korean Blood Sausage)", zh:"韩式血肠"},
+      ingredients:{ko:"돼지 창자, 당면, 선지, 채소", en:"Pork intestine casing, glass noodles, pig's blood, vegetables", zh:"猪肠衣、粉丝、猪血、蔬菜"},
+      taste:{ko:"쫄깃한 순대에 당면이 가득 찬 분식집 대표 메뉴", en:"Chewy sausage casing packed with glass noodles — a snack-shop staple", zh:"有嚼劲的肠衣里塞满粉丝,是小吃店代表菜品"},
+      tip:{ko:"소금이나 초고추장에 찍어 먹어요", en:"Dip in salt or spicy vinegar-chili sauce", zh:"蘸盐或醋辣酱食用"},
+      about:{ko:"떡볶이, 튀김과 함께 분식 삼총사로 불리는 길거리 음식이에요.", en:"Often grouped with tteokbokki and fried snacks as one of Korea's 'street food trio'.", zh:"常与辣炒年糕、炸物并称为路边小吃三剑客。"},
+      pairing:{ko:"간이나 허파 부속과 함께 나오기도 해요", en:"Sometimes served alongside liver or lung as extra sides", zh:"有时会搭配猪肝、猪肺一同上桌"}},
+    {id:"bossam", emoji:"🥬", spice:0, vegan:false, vegetarian:false, halal:false, pork:true, seafood:false,
+      name:{ko:"보쌈", en:"Bossam (Boiled Pork Wraps)", zh:"白切肉包菜"},
+      ingredients:{ko:"삶은 돼지고기, 배추, 새우젓, 무생채", en:"Boiled pork belly, napa cabbage leaves, salted shrimp, radish salad", zh:"白切五花肉、白菜叶、虾酱、萝卜丝"},
+      taste:{ko:"부드럽게 삶아낸 돼지고기를 채소에 싸 먹는 담백한 요리", en:"Tender boiled pork wrapped fresh in cabbage — lighter than grilled meat", zh:"软嫩白切猪肉配蔬菜包着吃,口感清爽"},
+      tip:{ko:"새우젓을 살짝 올려 먹으면 감칠맛이 더해져요", en:"A dab of salted shrimp adds a savory kick", zh:"加一点虾酱能提升鲜味"},
+      about:{ko:"기름기를 뺀 담백한 돼지고기 요리로, 삼겹살 구이의 산뜻한 대안으로 인기가 많아요.", en:"A leaner alternative to grilled pork belly, popular for its cleaner, lighter flavor.", zh:"去油清爽的猪肉料理,是烤五花肉的清淡替代选择。"},
+      pairing:{ko:"묵은지와 함께 싸 먹으면 더 맛있어요", en:"Even better wrapped together with aged kimchi", zh:"配熟成泡菜一起包着吃更美味"}},
+    {id:"jokbal", emoji:"🐖", spice:0, vegan:false, vegetarian:false, halal:false, pork:true, seafood:false,
+      name:{ko:"족발", en:"Jokbal (Braised Pig's Trotters)", zh:"猪蹄"},
+      ingredients:{ko:"돼지족발, 간장, 한약재, 마늘, 생강", en:"Pig's trotters, soy sauce, medicinal herbs, garlic, ginger", zh:"猪蹄、酱油、中药材、大蒜、生姜"},
+      taste:{ko:"쫀득한 껍질과 부드러운 살코기가 어우러진 야식 메뉴", en:"Chewy skin and tender meat — a favorite late-night delivery order", zh:"Q弹猪皮与软嫩瘦肉相间,是热门夜宵外卖"},
+      tip:{ko:"새우젓이나 쌈장을 곁들이면 풍미가 살아나요", en:"Dip in salted shrimp or ssamjang to bring out the flavor", zh:"蘸虾酱或包饭酱风味更佳"},
+      about:{ko:"치킨과 함께 한국 배달 야식의 양대 산맥으로 불리는 메뉴예요.", en:"Along with fried chicken, it's one of the two kings of Korean late-night delivery food.", zh:"与炸鸡并称韩国夜宵外卖界的两大王者。"},
+      pairing:{ko:"소주와 함께 야식으로 즐겨요", en:"A classic late-night pairing with soju", zh:"常作为夜宵配烧酒享用"}},
+    {id:"kimchi-bokkeumbap", emoji:"🍳", spice:2, vegan:false, vegetarian:true, halal:true, pork:false, seafood:false,
+      name:{ko:"김치볶음밥", en:"Kimchi Fried Rice", zh:"泡菜炒饭"},
+      ingredients:{ko:"신 김치, 밥, 참기름, 계란후라이, 김가루", en:"Aged kimchi, rice, sesame oil, fried egg, seaweed flakes", zh:"熟成泡菜、米饭、香油、煎蛋、海苔碎"},
+      taste:{ko:"새콤매콤한 김치와 고소한 밥이 어우러진 한 끼", en:"Tangy, spicy kimchi stir-fried with rice for a quick, comforting meal", zh:"酸辣泡菜与香喷喷米饭融合的一餐"},
+      tip:{ko:"계란후라이를 터뜨려 비벼 먹으면 더 고소해요", en:"Break the fried egg yolk and mix it in for extra richness", zh:"把煎蛋蛋黄戳破拌匀会更香浓"},
+      about:{ko:"남은 김치를 활용해 집에서도 쉽게 만들어 먹는 대표적인 한식 볶음밥이에요.", en:"A go-to way to use up leftover kimchi — one of the easiest Korean comfort meals to make at home.", zh:"利用剩余泡菜制作的家常炒饭代表,做法简单。"},
+      pairing:{ko:"치즈를 얹으면 더욱 고소해져요", en:"Melted cheese on top makes it even richer", zh:"加芝士会更加香浓"}},
+    {id:"yukgaejang", emoji:"🌶️", spice:3, vegan:false, vegetarian:false, halal:true, pork:false, seafood:false,
+      name:{ko:"육개장", en:"Yukgaejang (Spicy Beef Soup)", zh:"辣牛肉汤"},
+      ingredients:{ko:"소고기, 고사리, 대파, 숙주나물, 고춧가루", en:"Shredded beef, fernbrake, scallion, bean sprouts, chili powder", zh:"牛肉丝、蕨菜、大葱、豆芽、辣椒粉"},
+      taste:{ko:"매콤하고 얼큰한 국물에 소고기와 채소가 듬뿍 든 보양식", en:"A hearty, fiery soup loaded with shredded beef and vegetables", zh:"辣味浓郁的汤中满是牛肉丝和蔬菜的滋补汤品"},
+      tip:{ko:"밥을 말아 든든하게 한 끼로 즐겨요", en:"Mix in a bowl of rice for a filling, complete meal", zh:"拌入米饭吃更饱腹"},
+      about:{ko:"장례식장 손님 접대 음식으로도 알려져 있지만, 평소에도 즐겨 먹는 보양 국물이에요.", en:"Traditionally served at funerals as a guest meal, but also a beloved everyday comfort soup.", zh:"传统上也是丧礼待客的餐食,但同样是日常喜爱的滋补汤品。"},
+      pairing:{ko:"흰쌀밥과 함께 먹는 게 기본이에요", en:"Always eaten with a bowl of steamed white rice", zh:"通常配白米饭一起食用"}},
+    {id:"kongnamul-gukbap", emoji:"🫘", spice:1, vegan:true, vegetarian:true, halal:true, pork:false, seafood:false,
+      name:{ko:"콩나물국밥", en:"Kongnamul Gukbap (Bean Sprout Soup with Rice)", zh:"豆芽汤饭"},
+      ingredients:{ko:"콩나물, 밥, 멸치육수, 김가루, 계란(선택)", en:"Bean sprouts, rice, anchovy broth, seaweed flakes, optional egg", zh:"豆芽、米饭、鳀鱼高汤、海苔碎、鸡蛋(可选)"},
+      taste:{ko:"맑고 시원한 국물의 담백한 해장 국밥", en:"A clean, refreshing broth known as a gentle hangover remedy", zh:"清爽清淡的汤饭,是温和的解酒美食"},
+      tip:{ko:"새우젓으로 간을 맞춰 드세요", en:"Season to taste with a bit of salted shrimp", zh:"可用虾酱调味"},
+      about:{ko:"전주 지역에서 특히 유명한 해장국으로, 아침 일찍부터 문 여는 식당이 많아요.", en:"Especially famous in Jeonju, this hangover soup is served at restaurants that open early in the morning.", zh:"在全州地区尤为出名的解酒汤,很多店家一大早就开门营业。"},
+      pairing:{ko:"뜨거울 때 계란을 톡 터뜨려 드세요", en:"Crack a raw egg in while it's piping hot", zh:"趁热打入生鸡蛋"}}
+  ];
+
+  var S = {
+    ko:{siteTitle:"한국음식 가이드", heroHead:"궁금한 한국 음식을 검색해보세요", heroLead:"재료, 맛, 맵기, 식단 정보까지 한눈에",
+      searchPh:"음식 이름을 입력하세요 (예: 비빔밥)", tabSearch:"검색", tabSaved:"저장됨",
+      filtersLabel:"식단 필터", fVegan:"비건", fVeg:"채식", fHalal:"할랄 친화", fNoPork:"돼지고기 제외", fNoSeafood:"해산물 제외", fMild:"순한맛만", fAdventurous:"도전 메뉴",
+      spice:"맵기", sp0:"안 매움", sp1:"순한맛 · 후추 정도", sp2:"중간맛 · 할라피뇨 정도", sp3:"매운맛 · 스리라차 정도", sp4:"아주 매운맛 · 하바네로 정도",
+      ingredients:"재료", taste:"맛", tip:"TIP", save:"저장하기", unsave:"저장 취소", goodToKnow:"알아두면 좋아요", close:"닫기", findNear:"내 주변 {name} 찾기",
+      badgeVegan:"🌱 비건", badgeVeg:"🥕 채식", badgeHalal:"🕌 할랄 친화", badgePork:"🐖 돼지고기 포함", badgeSeafood:"🐟 해산물 포함", badgeAdventurous:"🌟 도전 메뉴",
+      results:"개의 음식", noResults:"검색 결과가 없어요. 다른 검색어나 필터를 시도해보세요.", tapHint:"자세히 보려면 탭하세요",
+      savedEmptyTitle:"아직 저장한 음식이 없어요", savedEmptyBody:"검색 탭에서 하트를 눌러 마음에 드는 음식을 저장해보세요.",
+      footer:"한국에서의 첫 식사가 즐겁기를 바라며 🇰🇷"},
+    en:{siteTitle:"K-Food Guide", heroHead:"Search any Korean dish you're curious about", heroLead:"Ingredients, flavor, spice level, and dietary info — all at a glance",
+      searchPh:"Search a dish (e.g. Bibimbap)", tabSearch:"Search", tabSaved:"Saved",
+      filtersLabel:"Dietary Filters", fVegan:"Vegan", fVeg:"Vegetarian", fHalal:"Halal-friendly", fNoPork:"No Pork", fNoSeafood:"No Seafood", fMild:"Mild only", fAdventurous:"Adventurous",
+      spice:"Spice Level", sp0:"Not spicy", sp1:"Mild · like black pepper", sp2:"Medium · like jalapeño", sp3:"Hot · like sriracha", sp4:"Very hot · like habanero",
+      ingredients:"Ingredients", taste:"Taste", tip:"TIP", save:"Save", unsave:"Unsave", goodToKnow:"Good to know", close:"Close", findNear:"Find {name} Near Me",
+      badgeVegan:"🌱 Vegan", badgeVeg:"🥕 Vegetarian", badgeHalal:"🕌 Halal-friendly", badgePork:"🐖 Contains pork", badgeSeafood:"🐟 Contains seafood", badgeAdventurous:"🌟 Adventurous pick",
+      results:" dishes", noResults:"No dishes match your search. Try a different keyword or filter.", tapHint:"Tap for details",
+      savedEmptyTitle:"No saved dishes yet", savedEmptyBody:"Tap the heart on any dish in Search to save it here for later.",
+      footer:"Wishing you a delicious first meal in Korea 🇰🇷"},
+    zh:{siteTitle:"韩食指南", heroHead:"搜索你好奇的韩国美食", heroLead:"食材、口味、辣度与饮食信息一目了然",
+      searchPh:"输入菜名搜索(例如:拌饭)", tabSearch:"搜索", tabSaved:"已收藏",
+      filtersLabel:"饮食筛选", fVegan:"纯素", fVeg:"素食", fHalal:"清真友好", fNoPork:"不含猪肉", fNoSeafood:"不含海鲜", fMild:"只看不辣", fAdventurous:"挑战美食",
+      spice:"辣度", sp0:"不辣", sp1:"微辣 · 如黑胡椒", sp2:"中辣 · 如墨西哥辣椒", sp3:"辣 · 如是拉差辣酱", sp4:"非常辣 · 如哈瓦那辣椒",
+      ingredients:"食材", taste:"口味", tip:"小贴士", save:"收藏", unsave:"取消收藏", goodToKnow:"小知识", close:"关闭", findNear:"查找我附近的{name}",
+      badgeVegan:"🌱 纯素", badgeVeg:"🥕 素食", badgeHalal:"🕌 清真友好", badgePork:"🐖 含猪肉", badgeSeafood:"🐟 含海鲜", badgeAdventurous:"🌟 挑战美食",
+      results:" 道菜", noResults:"没有找到匹配的菜品,试试其他关键词或筛选条件。", tapHint:"点击查看详情",
+      savedEmptyTitle:"还没有收藏的菜品", savedEmptyBody:"去搜索页点击爱心图标收藏喜欢的菜品吧。",
+      footer:"祝你在韩国的第一餐愉快 🇰🇷"}
+  };
+
+  var state = {lang:"en", tab:"search", query:"", filters:new Set(), saved:new Set(), detailId:null};
+
+  try{
+    var savedLang = localStorage.getItem("kfood_lang");
+    if(savedLang && S[savedLang]) state.lang = savedLang;
+    var savedIds = JSON.parse(localStorage.getItem("kfood_saved") || "[]");
+    savedIds.forEach(function(id){ state.saved.add(id); });
+  }catch(e){}
+
+  function persist(){
+    try{
+      localStorage.setItem("kfood_lang", state.lang);
+      localStorage.setItem("kfood_saved", JSON.stringify(Array.from(state.saved)));
+    }catch(e){}
+  }
+
+  function t(key){ return S[state.lang][key]; }
+
+  function matchesFilters(item){
+    if(state.filters.has("vegan") && !item.vegan) return false;
+    if(state.filters.has("vegetarian") && !item.vegetarian) return false;
+    if(state.filters.has("halal") && !item.halal) return false;
+    if(state.filters.has("noPork") && item.pork) return false;
+    if(state.filters.has("noSeafood") && item.seafood) return false;
+    if(state.filters.has("mild") && item.spice > 1) return false;
+    if(state.filters.has("adventurous") && !item.adventurous) return false;
+    return true;
+  }
+
+  function findById(id){
+    for(var i=0;i<DATA.length;i++){ if(DATA[i].id === id) return DATA[i]; }
+    return null;
+  }
+
+  function mapUrl(item){
+    return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(item.name.ko + " 맛집");
+  }
+
+  function matchesQuery(item){
+    var q = state.query.trim().toLowerCase();
+    if(!q) return true;
+    return item.name.ko.toLowerCase().indexOf(q) > -1 ||
+           item.name.en.toLowerCase().indexOf(q) > -1 ||
+           item.name.zh.toLowerCase().indexOf(q) > -1 ||
+           item.ingredients[state.lang].toLowerCase().indexOf(q) > -1;
+  }
+
+  function spiceLabel(n){ return t("sp" + n); }
+
+  function pips(n){
+    var out = "";
+    for(var i=0;i<4;i++){
+      out += '<span class="pip' + (i < n ? ' filled' : '') + '"></span>';
+    }
+    return out;
+  }
+
+  function badges(item){
+    var b = [];
+    if(item.adventurous) b.push('<span class="badge badge-adventurous">' + t("badgeAdventurous") + '</span>');
+    if(item.vegan) b.push('<span class="badge">' + t("badgeVegan") + '</span>');
+    else if(item.vegetarian) b.push('<span class="badge">' + t("badgeVeg") + '</span>');
+    if(item.halal) b.push('<span class="badge">' + t("badgeHalal") + '</span>');
+    if(item.pork) b.push('<span class="badge">' + t("badgePork") + '</span>');
+    if(item.seafood) b.push('<span class="badge">' + t("badgeSeafood") + '</span>');
+    return b.join("");
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  function cardHtml(item){
+    var name = escapeHtml(item.name[state.lang]);
+    var native = state.lang === "ko" ? "" : '<div class="caption native">' + escapeHtml(item.name.ko) + '</div>';
+    var isSaved = state.saved.has(item.id);
+    return (
+      '<article class="card" data-id="' + item.id + '" data-action="open-detail" tabindex="0" role="button" aria-haspopup="dialog" aria-label="' + name + ' — ' + t("tapHint") + '">' +
+        '<button class="save-btn" data-action="toggle-save" data-id="' + item.id + '" aria-pressed="' + isSaved + '" aria-label="' + (isSaved ? t("unsave") : t("save")) + '">' + (isSaved ? "♥" : "♡") + '</button>' +
+        '<div class="card-top">' +
+          '<div class="tile-emoji" aria-hidden="true">' + item.emoji + '</div>' +
+          '<div class="card-name">' +
+            '<div class="body-strong tracked-body">' + name + '</div>' +
+            native +
+          '</div>' +
+        '</div>' +
+        '<div class="spice-row">' +
+          '<span aria-hidden="true">🌶️</span>' +
+          '<span class="pips">' + pips(item.spice) + '</span>' +
+          '<span class="caption spice-text">' + spiceLabel(item.spice) + '</span>' +
+        '</div>' +
+        '<div>' +
+          '<div class="field-label">' + t("ingredients") + '</div>' +
+          '<div class="caption field-value">' + escapeHtml(item.ingredients[state.lang]) + '</div>' +
+        '</div>' +
+        '<div>' +
+          '<div class="field-label">' + t("taste") + '</div>' +
+          '<div class="caption field-value">' + escapeHtml(item.taste[state.lang]) + '</div>' +
+        '</div>' +
+        '<div class="badge-row">' + badges(item) + '</div>' +
+        '<div class="tip-box fine-print">💡 ' + t("tip") + ': ' + escapeHtml(item.tip[state.lang]) + '</div>' +
+      '</article>'
+    );
+  }
+
+  function detailHtml(item){
+    var name = escapeHtml(item.name[state.lang]);
+    var native = state.lang === "ko" ? "" : '<div class="caption native">' + escapeHtml(item.name.ko) + '</div>';
+    var isSaved = state.saved.has(item.id);
+    var findLabel = t("findNear").replace("{name}", name);
+    return (
+      '<div class="modal-backdrop" data-action="close-detail">' +
+        '<div class="modal-panel" role="dialog" aria-modal="true" aria-label="' + name + '">' +
+          '<button class="modal-close" data-action="close-detail" aria-label="' + t("close") + '">✕</button>' +
+          '<div class="card-top">' +
+            '<div class="tile-emoji modal-tile" aria-hidden="true">' + item.emoji + '</div>' +
+            '<div class="card-name">' +
+              '<h2 class="display-lg tracked-display" style="font-size:26px;">' + name + '</h2>' +
+              native +
+            '</div>' +
+          '</div>' +
+          '<div class="badge-row">' + badges(item) + '</div>' +
+          '<div class="spice-row">' +
+            '<span aria-hidden="true">🌶️</span>' +
+            '<span class="pips">' + pips(item.spice) + '</span>' +
+            '<span class="caption spice-text">' + spiceLabel(item.spice) + '</span>' +
+          '</div>' +
+          '<div>' +
+            '<div class="field-label">' + t("goodToKnow") + '</div>' +
+            '<div class="body-txt modal-about">' + escapeHtml(item.about[state.lang]) + '</div>' +
+          '</div>' +
+          '<div>' +
+            '<div class="field-label">' + t("ingredients") + '</div>' +
+            '<div class="caption field-value">' + escapeHtml(item.ingredients[state.lang]) + '</div>' +
+          '</div>' +
+          '<div>' +
+            '<div class="field-label">' + t("taste") + '</div>' +
+            '<div class="caption field-value">' + escapeHtml(item.taste[state.lang]) + '</div>' +
+          '</div>' +
+          '<div class="caption pairing-box">🥂 ' + escapeHtml(item.pairing[state.lang]) + '</div>' +
+          '<div class="tip-box fine-print">💡 ' + t("tip") + ': ' + escapeHtml(item.tip[state.lang]) + '</div>' +
+          '<button class="save-btn" data-action="toggle-save" data-id="' + item.id + '" aria-pressed="' + isSaved + '" style="position:static;align-self:flex-start;font-size:24px;" aria-label="' + (isSaved ? t("unsave") : t("save")) + '">' + (isSaved ? "♥" : "♡") + '</button>' +
+          '<a class="btn-find" href="' + escapeHtml(mapUrl(item)) + '" target="_blank" rel="noopener noreferrer">📍 ' + findLabel + '</a>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function filterChip(key, label){
+    var active = state.filters.has(key);
+    return '<button class="filter-chip" data-action="toggle-filter" data-key="' + key + '" aria-pressed="' + active + '">' + label + '</button>';
+  }
+
+  function render(){
+    document.documentElement.lang = state.lang;
+    document.body.className = "lang-" + state.lang;
+
+    var list = DATA.filter(function(item){
+      return matchesQuery(item) && matchesFilters(item);
+    });
+
+    var savedList = DATA.filter(function(item){ return state.saved.has(item.id); });
+    var activeList = state.tab === "saved" ? savedList : list;
+
+    var app = document.getElementById("app");
+
+    var langBtns = ["ko","en","zh"].map(function(l){
+      var lbl = l === "ko" ? "한국어" : (l === "en" ? "EN" : "中文");
+      return '<button class="lang-btn" data-action="set-lang" data-lang="' + l + '" aria-pressed="' + (state.lang===l) + '">' + lbl + '</button>';
+    }).join("");
+
+    var filterChips = state.tab === "search" ? (
+      '<section class="filters">' +
+        '<div class="caption filters-label">' + t("filtersLabel") + '</div>' +
+        '<div class="chip-row">' +
+          filterChip("vegan", t("fVegan")) +
+          filterChip("vegetarian", t("fVeg")) +
+          filterChip("halal", t("fHalal")) +
+          filterChip("noPork", t("fNoPork")) +
+          filterChip("noSeafood", t("fNoSeafood")) +
+          filterChip("mild", t("fMild")) +
+          filterChip("adventurous", "🌟 " + t("fAdventurous")) +
+        '</div>' +
+      '</section>'
+    ) : "";
+
+    var searchBar = state.tab === "search" ? (
+      '<div class="search-wrap">' +
+        '<input class="search-input tracked-body" type="text" id="search-input" placeholder="' + t("searchPh") + '" value="' + escapeHtml(state.query) + '" aria-label="' + t("searchPh") + '">' +
+      '</div>'
+    ) : "";
+
+    var resultsMeta = state.tab === "search"
+      ? '<div class="caption results-meta">' + activeList.length + t("results") + '</div>'
+      : "";
+
+    var gridOrEmpty;
+    if(activeList.length === 0){
+      if(state.tab === "saved"){
+        gridOrEmpty = '<div class="empty-state"><div class="glyph">🤍</div><div class="body-strong">' + t("savedEmptyTitle") + '</div><div class="caption" style="margin-top:6px;">' + t("savedEmptyBody") + '</div></div>';
+      } else {
+        gridOrEmpty = '<div class="empty-state"><div class="glyph">🔍</div><div class="caption">' + t("noResults") + '</div></div>';
+      }
+    } else {
+      gridOrEmpty = '<div class="grid">' + activeList.map(cardHtml).join("") + '</div>';
+    }
+
+    var detailItem = state.detailId ? findById(state.detailId) : null;
+    var modal = detailItem ? detailHtml(detailItem) : "";
+
+    app.innerHTML =
+      '<header class="gnav">' +
+        '<div class="gnav-brand">🥢 ' + t("siteTitle") + '</div>' +
+        '<div class="lang-switch">' + langBtns + '</div>' +
+      '</header>' +
+      '<section class="hero">' +
+        '<div class="hero-inner">' +
+          '<h1 class="hero-display tracked-hero">' + t("heroHead") + '</h1>' +
+          '<p class="lead tracked-display">' + t("heroLead") + '</p>' +
+          searchBar +
+          '<div class="tabs" role="tablist">' +
+            '<button class="tab-btn" role="tab" data-action="set-tab" data-tab="search" aria-selected="' + (state.tab==="search") + '">' + t("tabSearch") + '</button>' +
+            '<button class="tab-btn" role="tab" data-action="set-tab" data-tab="saved" aria-selected="' + (state.tab==="saved") + '">' + t("tabSaved") + ' (' + state.saved.size + ')</button>' +
+          '</div>' +
+        '</div>' +
+      '</section>' +
+      filterChips +
+      resultsMeta +
+      gridOrEmpty +
+      '<footer class="site-footer fine-print">' + t("footer") + '</footer>' +
+      modal;
+
+    if(detailItem){
+      var closeBtn = document.querySelector(".modal-close");
+      if(closeBtn) closeBtn.focus();
+    } else {
+      var input = document.getElementById("search-input");
+      if(input){
+        input.focus();
+        var v = input.value;
+        input.value = "";
+        input.value = v;
+      }
+    }
+  }
+
+  document.addEventListener("click", function(e){
+    var btn = e.target.closest("[data-action]");
+    if(!btn) return;
+    var action = btn.getAttribute("data-action");
+    if(action === "set-lang"){
+      state.lang = btn.getAttribute("data-lang");
+      persist();
+      render();
+    } else if(action === "set-tab"){
+      state.tab = btn.getAttribute("data-tab");
+      render();
+    } else if(action === "toggle-filter"){
+      var key = btn.getAttribute("data-key");
+      if(state.filters.has(key)) state.filters.delete(key); else state.filters.add(key);
+      render();
+    } else if(action === "toggle-save"){
+      var id = btn.getAttribute("data-id");
+      if(state.saved.has(id)) state.saved.delete(id); else state.saved.add(id);
+      persist();
+      render();
+      e.stopPropagation();
+    } else if(action === "open-detail"){
+      state.detailId = btn.getAttribute("data-id");
+      render();
+    } else if(action === "close-detail"){
+      if(btn.classList.contains("modal-backdrop") && e.target !== btn) return;
+      state.detailId = null;
+      render();
+    }
+  });
+
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape" && state.detailId){
+      state.detailId = null;
+      render();
+      return;
+    }
+    if((e.key === "Enter" || e.key === " ") && e.target.matches('[data-action="open-detail"]')){
+      e.preventDefault();
+      state.detailId = e.target.getAttribute("data-id");
+      render();
+    }
+  });
+
+  document.addEventListener("input", function(e){
+    if(e.target && e.target.id === "search-input"){
+      state.query = e.target.value;
+      var list = DATA.filter(function(item){ return matchesQuery(item) && matchesFilters(item); });
+      document.querySelector(".results-meta") && (document.querySelector(".results-meta").textContent = list.length + t("results"));
+      var grid = document.querySelector(".grid");
+      var emptyState = document.querySelector(".empty-state");
+      if(list.length === 0){
+        var html = '<div class="empty-state"><div class="glyph">🔍</div><div class="caption">' + t("noResults") + '</div></div>';
+        if(grid){ grid.outerHTML = html; } else if(emptyState){ emptyState.outerHTML = html; }
+      } else {
+        var html = '<div class="grid">' + list.map(cardHtml).join("") + '</div>';
+        if(grid){ grid.outerHTML = html; } else if(emptyState){ emptyState.outerHTML = html; }
+      }
+    }
+  });
+
+  render();
+})();
+</script>
