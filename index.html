@@ -678,6 +678,10 @@
     }).catch(function(e){ console.warn("logEvent failed:", e); });
   }
 
+  function gaEvent(name, params){
+    if(window.gtag) window.gtag("event", name, params || {});
+  }
+
   function matchesQuery(item){
     var q = state.query.trim().toLowerCase();
     if(!q) return true;
@@ -920,7 +924,14 @@
       render();
     } else if(action === "find-near-me"){
       var fid = btn.getAttribute("data-id");
-      logEvent("find_near_me", findById(fid), {wasSaved: state.saved.has(fid)});
+      var foundItem = findById(fid);
+      var wasSaved = state.saved.has(fid);
+      logEvent("find_near_me", foundItem, {wasSaved: wasSaved});
+      gaEvent("find_near_me_click", {
+        food_id: fid,
+        food_name: foundItem ? foundItem.name.ko : fid,
+        was_saved: wasSaved
+      });
     }
   });
 
