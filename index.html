@@ -261,6 +261,18 @@
   button:active,.card:active,.btn-find:active{transform:scale(.96);}
 
   .badge.badge-adventurous{border-color:var(--accent);color:var(--accent);}
+  .badge.badge-tried{border-color:var(--accent);color:var(--accent);}
+
+  .tried-toggle{
+    align-self:flex-start;margin-top:2px;
+    border-radius:var(--radius-pill);padding:7px 14px;font-size:13px;font-weight:500;
+    border:1px solid var(--accent);background:transparent;color:var(--accent);
+  }
+  .tried-toggle[aria-pressed="true"]{background:var(--accent);color:#fff;}
+
+  .section-header{display:flex;align-items:baseline;gap:8px;max-width:1100px;margin:28px auto 4px;padding:0 20px;}
+  .section-header:first-of-type{margin-top:20px;}
+  .section-header .count{color:var(--text-tertiary);}
 
   /* ---------- detail modal ---------- */
   .modal-backdrop{
@@ -583,47 +595,53 @@
 
   var S = {
     ko:{siteTitle:"한국음식 가이드", heroHead:"궁금한 한국 음식을 검색해보세요", heroLead:"재료, 맛, 맵기, 식단 정보까지 한눈에",
-      searchPh:"음식 이름을 입력하세요 (예: 비빔밥)", tabSearch:"검색", tabSaved:"저장됨",
+      searchPh:"음식 이름을 입력하세요 (예: 비빔밥)", tabSearch:"검색", tabSaved:"먹으러 가기",
       filtersLabel:"식단 필터", fVegan:"비건", fVeg:"채식", fHalal:"할랄 친화", fNoPork:"돼지고기 제외", fNoSeafood:"해산물 제외", fMild:"순한맛만", fAdventurous:"도전 메뉴",
       spice:"맵기", sp0:"안 매움", sp1:"순한맛 · 후추 정도", sp2:"중간맛 · 할라피뇨 정도", sp3:"매운맛 · 스리라차 정도", sp4:"아주 매운맛 · 하바네로 정도",
       ingredients:"재료", taste:"맛", tip:"TIP", save:"저장하기", unsave:"저장 취소", goodToKnow:"알아두면 좋아요", close:"닫기", findNear:"내 주변 {name} 찾기",
-      badgeVegan:"🌱 비건", badgeVeg:"🥕 채식", badgeHalal:"🕌 할랄 친화", badgePork:"🐖 돼지고기 포함", badgeSeafood:"🐟 해산물 포함", badgeAdventurous:"🌟 도전 메뉴",
+      badgeVegan:"🌱 비건", badgeVeg:"🥕 채식", badgeHalal:"🕌 할랄 친화", badgePork:"🐖 돼지고기 포함", badgeSeafood:"🐟 해산물 포함", badgeAdventurous:"🌟 도전 메뉴", badgeTried:"✅ 먹어봄",
       results:"개의 음식", noResults:"검색 결과가 없어요. 다른 검색어나 필터를 시도해보세요.", tapHint:"자세히 보려면 탭하세요",
       savedEmptyTitle:"아직 저장한 음식이 없어요", savedEmptyBody:"검색 탭에서 하트를 눌러 마음에 드는 음식을 저장해보세요.",
+      untriedSection:"아직 안 먹어본 음식", triedSection:"먹어본 음식", markTried:"먹어봄으로 표시", markUntried:"안 먹어본 것으로 표시",
       footer:"한국에서의 첫 식사가 즐겁기를 바라며 🇰🇷"},
     en:{siteTitle:"K-Food Guide", heroHead:"Search any Korean dish you're curious about", heroLead:"Ingredients, flavor, spice level, and dietary info — all at a glance",
-      searchPh:"Search a dish (e.g. Bibimbap)", tabSearch:"Search", tabSaved:"Saved",
+      searchPh:"Search a dish (e.g. Bibimbap)", tabSearch:"Search", tabSaved:"To Eat",
       filtersLabel:"Dietary Filters", fVegan:"Vegan", fVeg:"Vegetarian", fHalal:"Halal-friendly", fNoPork:"No Pork", fNoSeafood:"No Seafood", fMild:"Mild only", fAdventurous:"Adventurous",
       spice:"Spice Level", sp0:"Not spicy", sp1:"Mild · like black pepper", sp2:"Medium · like jalapeño", sp3:"Hot · like sriracha", sp4:"Very hot · like habanero",
       ingredients:"Ingredients", taste:"Taste", tip:"TIP", save:"Save", unsave:"Unsave", goodToKnow:"Good to know", close:"Close", findNear:"Find {name} Near Me",
-      badgeVegan:"🌱 Vegan", badgeVeg:"🥕 Vegetarian", badgeHalal:"🕌 Halal-friendly", badgePork:"🐖 Contains pork", badgeSeafood:"🐟 Contains seafood", badgeAdventurous:"🌟 Adventurous pick",
+      badgeVegan:"🌱 Vegan", badgeVeg:"🥕 Vegetarian", badgeHalal:"🕌 Halal-friendly", badgePork:"🐖 Contains pork", badgeSeafood:"🐟 Contains seafood", badgeAdventurous:"🌟 Adventurous pick", badgeTried:"✅ Tried",
       results:" dishes", noResults:"No dishes match your search. Try a different keyword or filter.", tapHint:"Tap for details",
       savedEmptyTitle:"No saved dishes yet", savedEmptyBody:"Tap the heart on any dish in Search to save it here for later.",
+      untriedSection:"Not Tried Yet", triedSection:"Tried", markTried:"Mark as Tried", markUntried:"Mark as Not Tried",
       footer:"Wishing you a delicious first meal in Korea 🇰🇷"},
     zh:{siteTitle:"韩食指南", heroHead:"搜索你好奇的韩国美食", heroLead:"食材、口味、辣度与饮食信息一目了然",
-      searchPh:"输入菜名搜索(例如:拌饭)", tabSearch:"搜索", tabSaved:"已收藏",
+      searchPh:"输入菜名搜索(例如:拌饭)", tabSearch:"搜索", tabSaved:"想吃清单",
       filtersLabel:"饮食筛选", fVegan:"纯素", fVeg:"素食", fHalal:"清真友好", fNoPork:"不含猪肉", fNoSeafood:"不含海鲜", fMild:"只看不辣", fAdventurous:"挑战美食",
       spice:"辣度", sp0:"不辣", sp1:"微辣 · 如黑胡椒", sp2:"中辣 · 如墨西哥辣椒", sp3:"辣 · 如是拉差辣酱", sp4:"非常辣 · 如哈瓦那辣椒",
       ingredients:"食材", taste:"口味", tip:"小贴士", save:"收藏", unsave:"取消收藏", goodToKnow:"小知识", close:"关闭", findNear:"查找我附近的{name}",
-      badgeVegan:"🌱 纯素", badgeVeg:"🥕 素食", badgeHalal:"🕌 清真友好", badgePork:"🐖 含猪肉", badgeSeafood:"🐟 含海鲜", badgeAdventurous:"🌟 挑战美食",
+      badgeVegan:"🌱 纯素", badgeVeg:"🥕 素食", badgeHalal:"🕌 清真友好", badgePork:"🐖 含猪肉", badgeSeafood:"🐟 含海鲜", badgeAdventurous:"🌟 挑战美食", badgeTried:"✅ 已尝试",
       results:" 道菜", noResults:"没有找到匹配的菜品,试试其他关键词或筛选条件。", tapHint:"点击查看详情",
       savedEmptyTitle:"还没有收藏的菜品", savedEmptyBody:"去搜索页点击爱心图标收藏喜欢的菜品吧。",
+      untriedSection:"还没尝试", triedSection:"已尝试", markTried:"标记为已尝试", markUntried:"标记为未尝试",
       footer:"祝你在韩国的第一餐愉快 🇰🇷"}
   };
 
-  var state = {lang:"en", tab:"search", query:"", filters:new Set(), saved:new Set(), detailId:null};
+  var state = {lang:"en", tab:"search", query:"", filters:new Set(), saved:new Set(), tried:new Set(), detailId:null};
 
   try{
     var savedLang = localStorage.getItem("kfood_lang");
     if(savedLang && S[savedLang]) state.lang = savedLang;
     var savedIds = JSON.parse(localStorage.getItem("kfood_saved") || "[]");
     savedIds.forEach(function(id){ state.saved.add(id); });
+    var triedIds = JSON.parse(localStorage.getItem("kfood_tried") || "[]");
+    triedIds.forEach(function(id){ state.tried.add(id); });
   }catch(e){}
 
   function persist(){
     try{
       localStorage.setItem("kfood_lang", state.lang);
       localStorage.setItem("kfood_saved", JSON.stringify(Array.from(state.saved)));
+      localStorage.setItem("kfood_tried", JSON.stringify(Array.from(state.tried)));
     }catch(e){}
   }
 
@@ -703,6 +721,7 @@
 
   function badges(item){
     var b = [];
+    if(state.tried.has(item.id)) b.push('<span class="badge badge-tried">' + t("badgeTried") + '</span>');
     if(item.adventurous) b.push('<span class="badge badge-adventurous">' + t("badgeAdventurous") + '</span>');
     if(item.vegan) b.push('<span class="badge">' + t("badgeVegan") + '</span>');
     else if(item.vegetarian) b.push('<span class="badge">' + t("badgeVeg") + '</span>');
@@ -718,10 +737,17 @@
     });
   }
 
-  function cardHtml(item){
+  function cardHtml(item, opts){
+    opts = opts || {};
     var name = escapeHtml(item.name[state.lang]);
     var native = state.lang === "ko" ? "" : '<div class="caption native">' + escapeHtml(item.name.ko) + '</div>';
     var isSaved = state.saved.has(item.id);
+    var isTried = state.tried.has(item.id);
+    var triedToggle = opts.showTriedToggle ? (
+      '<button class="tried-toggle" data-action="toggle-tried" data-id="' + item.id + '" aria-pressed="' + isTried + '" aria-label="' + (isTried ? t("markUntried") : t("markTried")) + '">' +
+        (isTried ? t("badgeTried") : "○ " + t("markTried")) +
+      '</button>'
+    ) : "";
     return (
       '<article class="card" data-id="' + item.id + '" data-action="open-detail" tabindex="0" role="button" aria-haspopup="dialog" aria-label="' + name + ' — ' + t("tapHint") + '">' +
         '<button class="save-btn" data-action="toggle-save" data-id="' + item.id + '" aria-pressed="' + isSaved + '" aria-label="' + (isSaved ? t("unsave") : t("save")) + '">' + (isSaved ? "♥" : "♡") + '</button>' +
@@ -747,6 +773,7 @@
         '</div>' +
         '<div class="badge-row">' + badges(item) + '</div>' +
         '<div class="tip-box fine-print">💡 ' + t("tip") + ': ' + escapeHtml(item.tip[state.lang]) + '</div>' +
+        triedToggle +
       '</article>'
     );
   }
@@ -849,6 +876,20 @@
       } else {
         gridOrEmpty = '<div class="empty-state"><div class="glyph">🔍</div><div class="caption">' + t("noResults") + '</div></div>';
       }
+    } else if(state.tab === "saved"){
+      var untriedList = activeList.filter(function(item){ return !state.tried.has(item.id); });
+      var triedList = activeList.filter(function(item){ return state.tried.has(item.id); });
+      gridOrEmpty = "";
+      if(untriedList.length){
+        gridOrEmpty +=
+          '<h2 class="tagline tracked-tagline section-header">' + t("untriedSection") + ' <span class="caption count">(' + untriedList.length + ')</span></h2>' +
+          '<div class="grid">' + untriedList.map(function(item){ return cardHtml(item, {showTriedToggle:true}); }).join("") + '</div>';
+      }
+      if(triedList.length){
+        gridOrEmpty +=
+          '<h2 class="tagline tracked-tagline section-header">' + t("triedSection") + ' <span class="caption count">(' + triedList.length + ')</span></h2>' +
+          '<div class="grid">' + triedList.map(function(item){ return cardHtml(item, {showTriedToggle:true}); }).join("") + '</div>';
+      }
     } else {
       gridOrEmpty = '<div class="grid">' + activeList.map(cardHtml).join("") + '</div>';
     }
@@ -913,6 +954,12 @@
       if(state.saved.has(id)){ state.saved.delete(id); nowSaved = false; } else { state.saved.add(id); nowSaved = true; }
       persist();
       logEvent(nowSaved ? "save" : "unsave", findById(id), {wasSaved: nowSaved});
+      render();
+      e.stopPropagation();
+    } else if(action === "toggle-tried"){
+      var tid = btn.getAttribute("data-id");
+      if(state.tried.has(tid)) state.tried.delete(tid); else state.tried.add(tid);
+      persist();
       render();
       e.stopPropagation();
     } else if(action === "open-detail"){
